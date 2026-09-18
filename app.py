@@ -127,34 +127,42 @@ button * {
         font-weight: bold !important;
     }
 
-    /* ===================================================
+   /* ===================================================
        サイドバー開閉ボタン：背景透明 ＋ 金枠 ＋ 金色アイコン
        =================================================== */
-    /* 1. ボタン枠本体：背景透明 ＋ 金色の枠線 */
+    /* 1. 左上ヘッダー全体の白背景を完全に透明化 */
+    header[data-testid="stHeader"] {
+        background-color: transparent !important;
+    }
+
+    /* 2. 閉じた時に出現する左上の枠＆ボタン：白背景を透明化し、金枠を付与 */
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] button,
     [data-testid="stSidebarCollapseButton"] button,
     button[data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarHeader"] button,
-    [data-testid="stSidebarCollapsedControl"] button {
+    [data-testid="stSidebarHeader"] button {
         background-color: transparent !important;
+        background: transparent !important;
         border: 1.5px solid #d4af37 !important;
         border-radius: 6px !important;
         padding: 4px 6px !important;
+        box-shadow: none !important;
     }
 
-    /* 2. 矢印アイコン（SVG・パス・文字色すべてを金色に強制） */
+    /* 3. 矢印アイコン（開閉どちらの状態でも金色に統一） */
+    [data-testid="stSidebarCollapsedControl"] *,
     [data-testid="stSidebarCollapseButton"] *,
-    [data-testid="stSidebarHeader"] button *,
-    [data-testid="stSidebarCollapsedControl"] * {
+    [data-testid="stSidebarHeader"] button * {
         color: #ffd700 !important;
         fill: #ffd700 !important;
         stroke: #ffd700 !important;
     }
 
-    /* 3. マウスを重ねた（ホバー）時の演出 */
+    /* 4. マウスホバー時の上品なゴールド演出 */
+    [data-testid="stSidebarCollapsedControl"]:hover,
+    [data-testid="stSidebarCollapsedControl"] button:hover,
     [data-testid="stSidebarCollapseButton"] button:hover,
-    button[data-testid="stSidebarCollapseButton"]:hover,
-    [data-testid="stSidebarHeader"] button:hover,
-    [data-testid="stSidebarCollapsedControl"] button:hover {
+    [data-testid="stSidebarHeader"] button:hover {
         background-color: rgba(212, 175, 55, 0.2) !important;
         box-shadow: 0 0 8px rgba(212, 175, 55, 0.5) !important;
     }
