@@ -94,25 +94,25 @@ button * {
         margin-bottom: 1.5rem !important;
         border-color: #2d5a45 !important;
     }
-   @media (min-width: 768px) {
-    /* 1. サイドバー全体の横幅を指定（例: 260px に調整） */
+
+    /* 1. サイドバー全体の横幅を指定 */
     section[data-testid="stSidebar"] {
         width: 180px !important;
         min-width: 180px !important;
     }
 
-    /* 2. /* 1. サイドバー全体の背景：深みのあるクリムゾンレッド */
+    /* 2. サイドバー全体の背景：深みのあるクリムゾンレッド */
     section[data-testid="stSidebar"],
     section[data-testid="stSidebar"] > div {
         background-color: #801212 !important;
     }
-　　
-   /* 3. サイドバー右端：金色の縦ライン */
+
+    /* 3. サイドバー右端：金色の縦ライン */
     section[data-testid="stSidebar"] {
         border-right: 3px solid #d4af37 !important;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5) !important;
     }
-   
+
     /* 4. メニュー文字色：赤背景で見やすい純白＋太字 */
     section[data-testid="stSidebar"] span,
     section[data-testid="stSidebar"] p {
@@ -126,11 +126,11 @@ button * {
         color: #ffd700 !important;
         font-weight: bold !important;
     }
-　}
- /* ===================================================
+
+    /* ===================================================
        サイドバー開閉ボタン：背景透明 ＋ 金枠 ＋ 金色アイコン
        =================================================== */
-    /* 1. 開いている時の閉じるボタン ＆ 閉じている時の再表示ボタン */
+    /* 開いている時の閉じるボタン ＆ 閉じている時の再表示ボタン */
     button[data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarCollapsedControl"] button {
         background-color: transparent !important;
@@ -140,7 +140,7 @@ button * {
         transition: all 0.2s ease-in-out !important;
     }
 
-    /* 2. 矢印アイコン（SVG）の色をゴールドに変更 */
+    /* 矢印アイコン（SVG）の色をゴールドに変更 */
     button[data-testid="stSidebarCollapseButton"] svg,
     [data-testid="stSidebarCollapsedControl"] button svg,
     button[data-testid="stSidebarCollapseButton"] svg path,
@@ -150,7 +150,7 @@ button * {
         stroke: #ffd700 !important;
     }
 
-    /* 3. マウスを重ねた（ホバー）時の上品な演出 */
+    /* マウスを重ねた（ホバー）時の演出 */
     button[data-testid="stSidebarCollapseButton"]:hover,
     [data-testid="stSidebarCollapsedControl"] button:hover {
         background-color: rgba(212, 175, 55, 0.15) !important;
