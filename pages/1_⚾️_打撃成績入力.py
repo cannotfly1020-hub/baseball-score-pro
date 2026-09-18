@@ -2,6 +2,7 @@ import io
 import json
 import base64
 from datetime import datetime
+import pandas as pd
 from google import genai
 from google.genai import types
 import streamlit as st
