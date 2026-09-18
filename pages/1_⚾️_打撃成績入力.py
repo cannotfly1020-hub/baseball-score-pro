@@ -8,6 +8,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
+# 独立させたモジュールから読み込み
 from prompts.batting_prompts import ROSTER_PROMPT, DETAILS_PROMPT
 from utils.batting_utils import enhance_sharpness, calculate_stats_from_grid, create_excel_from_compiled, RESULT_OPTIONS
 
@@ -17,6 +18,9 @@ st.set_page_config(
     layout="wide",
 )
 
+# ----------------------------------------------------
+# チームカラー UIデザイン（打撃アプリのデザインCSSを完全移植）
+# ----------------------------------------------------
 st.markdown("""
 <style>
 /* 1. 画面全体の背景：天然芝の深緑 */
@@ -25,28 +29,12 @@ st.markdown("""
     color: #f0f4f1 !important;
 }
 
-/* スマホ用の上部余白（維持） */
+/* 2. スマホ上部メニューバーとの重なりを防ぐ上部スペース */
 .block-container {
     padding-top: 3.8rem !important;
     padding-bottom: 2rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
-}
-
-/* PC画面のみ上部と全体の余白を引き締める */
-@media (min-width: 768px) {
-    .block-container {
-        padding-top: 1.8rem !important;
-        padding-bottom: 2rem !important;
-        max-width: 1400px !important;
-    }
-}
-
-/* 説明文・キャプションの視認性改善（白・明色でくっきり） */
-div[data-testid="stCaptionContainer"] p {
-    color: #e0ece5 !important;
-    font-size: 0.92rem !important;
-    font-weight: 500 !important;
 }
 
 /* 3. タブバー外枠：金色アンダーライン */
@@ -58,7 +46,7 @@ div[data-testid="stCaptionContainer"] p {
     background-color: transparent !important;
     border-bottom: 2.5px solid #d4af37 !important;
     -webkit-overflow-scrolling: touch;
-    margin-bottom: 0.8rem !important;
+    margin-bottom: 1rem !important;
 }
 
 /* 4. 非選択タブ */
@@ -96,7 +84,7 @@ h1, h2, h3, h4 {
 /* 7. ファイルアップローダー */
 [data-testid="stFileUploader"] {
     background-color: #172d22 !important;
-    border: 1.5px dashed #d4af37 !important;
+    border: 1px dashed #d4af37 !important;
     border-radius: 10px !important;
     padding: 10px !important;
 }
@@ -144,14 +132,6 @@ div[data-testid="stForm"] button * {
     color: #ffffff !important;
 }
 
-/* 選手手動追加ボタンの視認性改善（緑地＋金枠＋白文字でくっきり） */
-div[data-testid="stButton"] > button:has(div:contains("この試合に選手を手動追加")) {
-    background-color: #1b382b !important;
-    color: #ffffff !important;
-    border: 1.5px solid #d4af37 !important;
-    font-weight: bold !important;
-}
-
 /* 11. イニング枠ヘッダー（◇ ダイヤモンド） */
 .inning-header {
     text-align: center;
@@ -186,11 +166,13 @@ div[data-testid="stButton"] > button:has(div:contains("この試合に選手を�
 </style>
 """, unsafe_allow_html=True)
 
+# セッション状態の初期化
 if "all_matches_data" not in st.session_state:
     st.session_state.all_matches_data = {}
 if "match_images_b64" not in st.session_state:
     st.session_state.match_images_b64 = {}
 
+# APIキー設定
 api_key = st.secrets.get("GEMINI_API_KEY")
 if not api_key:
     api_key = st.sidebar.text_input("管理者APIキー (Gemini)", type="password")
@@ -200,6 +182,9 @@ client = genai.Client(api_key=api_key) if api_key else None
 st.subheader("⚾️ スコア照合・打席盤面エディタ")
 st.caption("高精細カラー解析により、手書き文字および赤ペン結線を走査・判定します。")
 
+# ----------------------------------------------------
+# バックアップ読み込み（打撃アプリの完全復元ロジック）
+# ----------------------------------------------------
 with st.expander("📂 前回の作業バックアップ（JSON）を読み込んで再開する", expanded=False):
     backup_file = st.file_uploader(
         "保存したバックアップJSONファイルを選択",
@@ -250,6 +235,7 @@ if uploaded_files:
             highres_bytes = enhance_sharpness(pil_img)
 
             try:
+                # Step 1: 選手名簿の確定
                 res_roster = client.models.generate_content(
                     model="gemini-3.6-flash",
                     contents=[
@@ -264,6 +250,7 @@ if uploaded_files:
                 )
                 roster_data = res_roster.text
 
+                # Step 2: 打席判定
                 status_text.text(f"【{idx+1}/{len(uploaded_files)}】{f_name} の全イニング打席を精査中...")
                 res_details = client.models.generate_content(
                     model="gemini-3.6-flash",
@@ -291,9 +278,13 @@ if uploaded_files:
             st.session_state.match_images_b64 = new_images_b64
             st.success(f"🎉 全 {len(new_all_matches)} 試合分の解析が完了しました！")
 
+# ----------------------------------------------------
+# データが存在する場合の編集エディタ & バックアップ保存
+# ----------------------------------------------------
 if st.session_state.all_matches_data:
     st.divider()
 
+    # バックアップダウンロード
     current_backup_payload = {
         "all_matches_data": st.session_state.all_matches_data,
         "match_images_b64": st.session_state.match_images_b64,
@@ -318,6 +309,22 @@ if st.session_state.all_matches_data:
     current_players = st.session_state.all_matches_data.get(selected_match_file, [])
     current_b64 = st.session_state.match_images_b64.get(selected_match_file, "")
 
+    add_col1, add_col2 = st.columns([1, 3])
+    with add_col1:
+        if st.button("➕ この試合に選手を手動追加"):
+            new_player_template = {
+                "batting_order": len(current_players) + 1,
+                "uniform_number": "",
+                "player_name": f"追加選手{len(current_players) + 1}",
+                "is_substitute": True,
+                "rbi": 0,
+                "stolen_bases": 0,
+                "innings": {"1": "なし", "2": "なし", "3": "なし", "4": "なし", "5": "なし", "6": "なし", "7": "なし"},
+                "highlight": ""
+            }
+            st.session_state.all_matches_data[selected_match_file].append(new_player_template)
+            st.rerun()
+
     col_img, col_grid = st.columns([1.1, 1.3])
 
     with col_img:
@@ -335,22 +342,7 @@ if st.session_state.all_matches_data:
         components.html(viewer_html, height=box_height + 20)
 
     with col_grid:
-        h_c1, h_c2 = st.columns([1.6, 1])
-        h_c1.markdown("#### 🎯 打席盤面エディタ")
-        if h_c2.button("➕ 選手を手動追加", use_container_width=True):
-            new_player_template = {
-                "batting_order": len(current_players) + 1,
-                "uniform_number": "",
-                "player_name": f"追加選手{len(current_players) + 1}",
-                "is_substitute": True,
-                "rbi": 0,
-                "stolen_bases": 0,
-                "innings": {"1": "なし", "2": "なし", "3": "なし", "4": "なし", "5": "なし", "6": "なし", "7": "なし"},
-                "highlight": ""
-            }
-            st.session_state.all_matches_data[selected_match_file].append(new_player_template)
-            st.rerun()
-
+        st.markdown("#### 🎯 打席盤面エディタ")
         st.caption("タブを指で横にスワイプして選手を選択し、修正後は「保存」を押してください。")
 
         tab_labels = []
@@ -417,6 +409,7 @@ if st.session_state.all_matches_data:
                         st.success(f"{p_name} 選手のデータを保存しました！")
                         st.rerun()
 
+                # 誤って追加した選手枠の削除ボタン
                 if st.button(f"🗑️ この選手枠（{p_name_init or '追加選手'}）を削除", key=f"del_btn_{selected_match_file}_{idx}"):
                     st.session_state.all_matches_data[selected_match_file].pop(idx)
                     st.warning(f"{p_name_init or '選手'} を削除しました。")
