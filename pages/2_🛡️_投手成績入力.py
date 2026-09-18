@@ -1,5 +1,4 @@
-from prompts.pitching_prompts import PITCHER_PROMPT
-from utils.pitching_utils import enhance_sharpness, calculate_pitcher_stats_from_grid, create_pitcher_excel_from_compiled, IP_OPTIONS, DECISION_OPTIONSimport io
+
 import json
 import base64
 from google import genai
@@ -8,8 +7,9 @@ import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
+# 独立させたモジュールから読み込み
 from prompts.pitching_prompts import PITCHER_PROMPT
-from utils.data_calc import enhance_sharpness, calculate_pitcher_stats_from_grid, DECISION_OPTIONS, IP_OPTIONS
+from utils.pitching_utils import enhance_sharpness, calculate_pitcher_stats_from_grid, create_pitcher_excel_from_compiled, IP_OPTIONS, DECISION_OPTIONSimport io
 
 st.set_page_config(
     page_title="投手成績解析＆エディタ",
