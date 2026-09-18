@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # ----------------------------------------------------
-# チームカラー UIデザイン（打撃アプリのデザインCSSを完全移植）
+# チームカラー UIデザイン（ホーム画面と完全統一）
 # ----------------------------------------------------
 st.markdown("""
 <style>
@@ -116,6 +116,7 @@ div[data-baseweb="select"] {
 }
 
 /* 10. 保存ボタン（クリムゾンレッド ＋ 金枠 ＋ 白文字） */
+button[kind="primary"], button[kind="secondary"],
 div[data-testid="stForm"] button[kind="secondaryFormSubmit"],
 div[data-testid="stForm"] button[data-testid="stBaseButton-secondaryFormSubmit"],
 div[data-testid="stForm"] button {
@@ -128,7 +129,7 @@ div[data-testid="stForm"] button {
     padding: 10px !important;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
 }
-div[data-testid="stForm"] button * {
+button *, div[data-testid="stForm"] button * {
     color: #ffffff !important;
 }
 
@@ -162,6 +163,147 @@ div[data-testid="stForm"] button * {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
     border: 1px solid #d4af37;
     margin-bottom: 12px;
+}
+
+/* ===================================================
+   全端末共通：サイドバーの「app」を「🏠 ホーム」に置換
+   =================================================== */
+/* 1. 一番上のリンク枠を基準位置に設定 */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a {
+    position: relative !important;
+}
+
+/* 2. 最上段の「app」の文字・要素を、PCの白文字指定に勝つ強度で100%完全透明化 */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a *,
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child span,
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child p {
+    color: transparent !important;
+    opacity: 0 !important;
+}
+
+/* 3. 「🏠 ホーム」を下のメニューと揃う位置に重ねて表示 */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a::after {
+    content: "🏠 ホーム" !important;
+    position: absolute !important;
+    left: 0.75rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 0.95rem !important;
+    font-weight: bold !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    white-space: nowrap !important;
+}
+
+/* 4. ホームが選択されている時は文字を金色にする */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[aria-selected="true"]::after {
+    color: #ffd700 !important;
+}
+
+/* ===================================================
+   PCモニター表示専用（横幅768px以上）の最適化
+   =================================================== */
+@media (min-width: 768px) {
+    /* PCでの無駄な上下余白を圧縮し、最大幅を適正化 */
+    .block-container {
+        padding-top: 2.0rem !important;
+        padding-bottom: 2.0rem !important;
+        padding-left: 2.5rem !important;
+        padding-right: 2.5rem !important;
+        max-width: 1400px !important;
+    }
+
+    /* PCモニターで沈んで見えにくかった説明文・案内文のコントラストを大幅強化 */
+    div[data-testid="stCaptionContainer"] p {
+        color: #e0ece5 !important;
+        font-size: 1.0rem !important;
+        font-weight: 500 !important;
+    }
+
+    /* 各種テキスト・小見出しの白文字コントラスト強化 */
+    p, span, label {
+        color: #f0f4f1 !important;
+    }
+
+    /* 区切り線（divider）の余白を適正に縮小 */
+    hr {
+        margin-top: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
+        border-color: #2d5a45 !important;
+    }
+
+    /* 1. サイドバー全体の横幅を指定 */
+    section[data-testid="stSidebar"] {
+        width: 180px !important;
+        min-width: 180px !important;
+    }
+
+    /* 2. サイドバー全体の背景：深みのあるクリムゾンレッド */
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] > div {
+        background-color: #801212 !important;
+    }
+
+    /* 3. サイドバー右端：金色の縦ライン */
+    section[data-testid="stSidebar"] {
+        border-right: 3px solid #d4af37 !important;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* 4. メニュー文字色：赤背景で見やすい純白＋太字 */
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] p {
+        color: #ffffff !important;
+        font-weight: bold !important;
+    }
+
+    /* 5. 選択中のメニュー項目の文字色（ゴールド） */
+    section[data-testid="stSidebar"] [aria-selected="true"] span,
+    section[data-testid="stSidebar"] [aria-selected="true"] p {
+        color: #ffd700 !important;
+        font-weight: bold !important;
+    }
+
+    /* ===================================================
+       サイドバー開閉ボタン：背景透明 ＋ 金枠 ＋ 金色アイコン
+       =================================================== */
+    /* 左上ヘッダー全体の白背景を完全に透明化 */
+    header[data-testid="stHeader"] {
+        background-color: transparent !important;
+    }
+
+    /* 開閉ボタン本体（枠線を金色・背景透明化） */
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="stSidebarCollapseButton"] button,
+    button[data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarHeader"] button {
+        background-color: transparent !important;
+        background: transparent !important;
+        border: 1.5px solid #d4af37 !important;
+        border-radius: 6px !important;
+        padding: 4px 6px !important;
+        box-shadow: none !important;
+    }
+
+    /* 矢印アイコン（開閉どちらの状態でも金色に統一） */
+    [data-testid="stSidebarCollapsedControl"] *,
+    [data-testid="stSidebarCollapseButton"] *,
+    [data-testid="stSidebarHeader"] button * {
+        color: #ffd700 !important;
+        fill: #ffd700 !important;
+        stroke: #ffd700 !important;
+    }
+
+    /* マウスホバー時の上品なゴールド演出 */
+    [data-testid="stSidebarCollapsedControl"]:hover,
+    [data-testid="stSidebarCollapsedControl"] button:hover,
+    [data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="stSidebarHeader"] button:hover {
+        background-color: rgba(212, 175, 55, 0.2) !important;
+        box-shadow: 0 0 8px rgba(212, 175, 55, 0.5) !important;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
