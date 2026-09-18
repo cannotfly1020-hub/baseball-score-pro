@@ -58,6 +58,31 @@ button * {
 }
 
 /* ===================================================
+   全端末共通：サイドバーの「app」を「🏠 ホーム」に置換
+   =================================================== */
+/* 1. 一番上のメニュー項目（app）の元の文字を非表示化 */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a span,
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child span {
+    font-size: 0 !important;
+}
+
+/* 2. 擬似要素で「🏠 ホーム」を差し込み */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a span::after,
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child span::after {
+    content: "🏠 ホーム" !important;
+    font-size: 0.95rem !important;
+    font-weight: bold !important;
+    color: #ffffff !important;
+    display: inline-block !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* 3. 選択中の時は金色文字 */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[aria-selected="true"] span::after {
+    color: #ffd700 !important;
+}
+
+/* ===================================================
    PCモニター表示専用（横幅768px以上）の最適化
    =================================================== */
 @media (min-width: 768px) {
