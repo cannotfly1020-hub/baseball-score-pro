@@ -18,7 +18,7 @@ st.markdown("""
     color: #f0f4f1 !important;
 }
 
-/* 2. スマホ上部スペース */
+/* 2. スマホ上部スペース（スマホ時は既存数値を完全維持） */
 .block-container {
     padding-top: 3.8rem !important;
     padding-bottom: 2rem !important;
@@ -55,6 +55,45 @@ button[kind="primary"], button[kind="secondary"] {
 }
 button * {
     color: #ffffff !important;
+}
+
+/* ===================================================
+   PCモニター表示専用（横幅768px以上）の最適化
+   =================================================== */
+@media (min-width: 768px) {
+    /* PCでの無駄な上下余白を圧縮し、最大幅を適正化 */
+    .block-container {
+        padding-top: 2.0rem !important;
+        padding-bottom: 2.0rem !important;
+        padding-left: 2.5rem !important;
+        padding-right: 2.5rem !important;
+        max-width: 1400px !important;
+    }
+
+    /* PCモニターで沈んで見えにくかった説明文・案内文のコントラストを大幅強化 */
+    div[data-testid="stCaptionContainer"] p {
+        color: #e0ece5 !important;
+        font-size: 1.0rem !important;
+        font-weight: 500 !important;
+    }
+
+    /* 各種テキスト・小見出しの白文字コントラスト強化 */
+    p, span, label {
+        color: #f0f4f1 !important;
+    }
+
+    /* メトリックタイトルのコントラスト強化 */
+    div[data-testid="stMetricLabel"] p {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+
+    /* 区切り線（divider）の余白を適正に縮小 */
+    hr {
+        margin-top: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
+        border-color: #2d5a45 !important;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
