@@ -127,6 +127,35 @@ button * {
         font-weight: bold !important;
     }
 　}
+ /* ===================================================
+       サイドバー開閉ボタン：背景透明 ＋ 金枠 ＋ 金色アイコン
+       =================================================== */
+    /* 1. 開いている時の閉じるボタン ＆ 閉じている時の再表示ボタン */
+    button[data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapsedControl"] button {
+        background-color: transparent !important;
+        border: 1.5px solid #d4af37 !important;
+        border-radius: 6px !important;
+        padding: 4px 6px !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+
+    /* 2. 矢印アイコン（SVG）の色をゴールドに変更 */
+    button[data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapsedControl"] button svg,
+    button[data-testid="stSidebarCollapseButton"] svg path,
+    [data-testid="stSidebarCollapsedControl"] button svg path {
+        fill: #ffd700 !important;
+        color: #ffd700 !important;
+        stroke: #ffd700 !important;
+    }
+
+    /* 3. マウスを重ねた（ホバー）時の上品な演出 */
+    button[data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="stSidebarCollapsedControl"] button:hover {
+        background-color: rgba(212, 175, 55, 0.15) !important;
+        box-shadow: 0 0 8px rgba(212, 175, 55, 0.4) !important;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
