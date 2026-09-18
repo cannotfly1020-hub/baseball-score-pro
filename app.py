@@ -94,6 +94,39 @@ button * {
         margin-bottom: 1.5rem !important;
         border-color: #2d5a45 !important;
     }
+   @media (min-width: 768px) {
+    /* 1. サイドバー全体の横幅を指定（例: 260px に調整） */
+    section[data-testid="stSidebar"] {
+        width: 260px !important;
+        min-width: 260px !important;
+    }
+
+    /* 2. /* 1. サイドバー全体の背景：深みのあるクリムゾンレッド */
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] > div {
+        background-color: #801212 !important;
+    }
+　　
+   /* 3. サイドバー右端：金色の縦ライン */
+    section[data-testid="stSidebar"] {
+        border-right: 3px solid #d4af37 !important;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5) !important;
+    }
+   
+    /* 4. メニュー文字色：赤背景で見やすい純白＋太字 */
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] p {
+        color: #ffffff !important;
+        font-weight: bold !important;
+    }
+
+    /* 5. 選択中のメニュー項目の文字色（ゴールド） */
+    section[data-testid="stSidebar"] [aria-selected="true"] span,
+    section[data-testid="stSidebar"] [aria-selected="true"] p {
+        color: #ffd700 !important;
+        font-weight: bold !important;
+    }
+　}
 }
 </style>
 """, unsafe_allow_html=True)
