@@ -12,62 +12,40 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-/* 1. 背景：天然芝の深緑 */
+/* 1. 画面全体の背景：天然芝の深緑 */
 .stApp {
     background-color: #0f1f17 !important;
     color: #f0f4f1 !important;
 }
 
-/* スマホ用の上部余白（維持） */
+/* 2. スマホ上部スペース */
 .block-container {
-    padding-top: 3.5rem !important;
+    padding-top: 3.8rem !important;
     padding-bottom: 2rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
 }
 
-/* PC画面のみ余白を引き締める */
-@media (min-width: 768px) {
-    .block-container {
-        padding-top: 1.8rem !important;
-        padding-bottom: 2rem !important;
-        max-width: 1300px !important;
-    }
-}
-
-/* 見出しの装飾 */
+/* 3. 見出し・タイトルの装飾 */
 h1, h2, h3, h4 {
     color: #ffffff !important;
-    letter-spacing: 0.5px !important;
 }
 
-/* キャプションの視認性改善（白・明色） */
-div[data-testid="stCaptionContainer"] p {
-    color: #c2d6cb !important;
-    font-size: 0.95rem !important;
-    font-weight: 500 !important;
-}
-
-/* メトリック数値：金色 */
+/* 4. メトリック数値：金色 */
 div[data-testid="stMetricValue"] {
     color: #ffd700 !important;
     font-weight: bold !important;
-    font-size: 1.8rem !important;
-}
-div[data-testid="stMetricLabel"] p {
-    color: #ffffff !important;
-    font-weight: 600 !important;
 }
 
-/* ファイルアップローダー */
+/* 5. ファイルアップローダー */
 [data-testid="stFileUploader"] {
     background-color: #172d22 !important;
-    border: 1.5px dashed #d4af37 !important;
+    border: 1px dashed #d4af37 !important;
     border-radius: 10px !important;
-    padding: 12px !important;
+    padding: 10px !important;
 }
 
-/* ボタン：クリムゾンレッド ＋ 金枠 ＋ 白文字 */
+/* 6. ボタン：クリムゾンレッド ＋ 金枠 ＋ 白文字 */
 button[kind="primary"], button[kind="secondary"] {
     background-color: #991b1b !important;
     color: #ffffff !important;
@@ -82,6 +60,7 @@ button * {
 """, unsafe_allow_html=True)
 
 def create_integrated_excel(compiled_batting: list, compiled_pitching: list) -> bytes:
+    """打撃・投手の統合成績および選手別個人シート付きExcel"""
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         if compiled_batting:
@@ -110,7 +89,7 @@ if "all_pitchers_data" not in st.session_state:
     st.session_state.all_pitchers_data = {}
 
 st.title("⚾️ 学童野球 スコア統合集計＆デジタル名鑑")
-st.caption("左側のサイドバーメニューから「打撃成績入力」または「投手成績入力」を選んで解析・編集を行ってください。")
+st.caption("左側のサイドバーメニューから「1_⚾️_打撃成績入力」または「2_🛡️_投手成績入力」を選んで解析・編集を行ってください。")
 
 with st.expander("📂 作業バックアップ（JSON）を読み込む / 保存する", expanded=False):
     up_backup = st.file_uploader("保存済みバックアップJSONファイルを選択", type=["json"])
@@ -142,7 +121,7 @@ compiled_bat = st.session_state.get("compiled_records", [])
 compiled_pit = st.session_state.get("compiled_pitchers", [])
 
 if not compiled_bat and not compiled_pit:
-    st.info("👈 左側のメニューから各成績入力ページを開き、スコアを解析・確定すると、ここにチームタイトル・通算名鑑・統合Excelが表示されます。")
+    st.info("👈 まず左側のメニューから各成績入力ページを開き、スコアの確定を行ってください。")
 else:
     df_bat = pd.DataFrame(compiled_bat) if compiled_bat else pd.DataFrame()
     df_pit = pd.DataFrame(compiled_pit) if compiled_pit else pd.DataFrame()
