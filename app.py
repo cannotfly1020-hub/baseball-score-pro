@@ -98,7 +98,7 @@ button * {
     /* 1. サイドバー全体の横幅を指定（例: 260px に調整） */
     section[data-testid="stSidebar"] {
         width: 140px !important;
-        min-width: 260px !important;
+        min-width: 180px !important;
     }
 
     /* 2. /* 1. サイドバー全体の背景：深みのあるクリムゾンレッド */
