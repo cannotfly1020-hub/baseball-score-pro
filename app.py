@@ -12,16 +12,21 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+/* 1. 背景：天然芝の深緑 */
 .stApp {
     background-color: #0f1f17 !important;
     color: #f0f4f1 !important;
 }
+
+/* スマホ用の上部余白（維持） */
 .block-container {
     padding-top: 3.5rem !important;
     padding-bottom: 2rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
 }
+
+/* PC画面のみ余白を引き締める */
 @media (min-width: 768px) {
     .block-container {
         padding-top: 1.8rem !important;
@@ -29,15 +34,21 @@ st.markdown("""
         max-width: 1300px !important;
     }
 }
+
+/* 見出しの装飾 */
 h1, h2, h3, h4 {
     color: #ffffff !important;
     letter-spacing: 0.5px !important;
 }
+
+/* キャプションの視認性改善（白・明色） */
 div[data-testid="stCaptionContainer"] p {
     color: #c2d6cb !important;
     font-size: 0.95rem !important;
     font-weight: 500 !important;
 }
+
+/* メトリック数値：金色 */
 div[data-testid="stMetricValue"] {
     color: #ffd700 !important;
     font-weight: bold !important;
@@ -47,12 +58,16 @@ div[data-testid="stMetricLabel"] p {
     color: #ffffff !important;
     font-weight: 600 !important;
 }
+
+/* ファイルアップローダー */
 [data-testid="stFileUploader"] {
     background-color: #172d22 !important;
     border: 1.5px dashed #d4af37 !important;
     border-radius: 10px !important;
     padding: 12px !important;
 }
+
+/* ボタン：クリムゾンレッド ＋ 金枠 ＋ 白文字 */
 button[kind="primary"], button[kind="secondary"] {
     background-color: #991b1b !important;
     color: #ffffff !important;
