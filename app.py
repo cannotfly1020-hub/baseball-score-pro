@@ -60,25 +60,32 @@ button * {
 /* ===================================================
    全端末共通：サイドバーの「app」を「🏠 ホーム」に置換
    =================================================== */
-/* 1. 一番上のメニュー項目（app）の元の文字を非表示化 */
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a span,
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child span {
-    font-size: 0 !important;
+/* 1. 一番上のリンク枠を基準位置に設定 */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a {
+    position: relative !important;
 }
 
-/* 2. 擬似要素で「🏠 ホーム」を差し込み */
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a span::after,
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child span::after {
+/* 2. 元の「app」という文字だけを透明化（領域はそのまま維持） */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a span {
+    color: transparent !important;
+}
+
+/* 3. その枠の上に「🏠 ホーム」の文字を重ねて表示 */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a::after {
     content: "🏠 ホーム" !important;
+    position: absolute !important;
+    left: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     font-size: 0.95rem !important;
     font-weight: bold !important;
     color: #ffffff !important;
-    display: inline-block !important;
-    letter-spacing: 0.5px !important;
+    pointer-events: none !important;
+    white-space: nowrap !important;
 }
 
-/* 3. 選択中の時は金色文字 */
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[aria-selected="true"] span::after {
+/* 4. ホームが選択されている時は文字を金色にする */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[aria-selected="true"]::after {
     color: #ffd700 !important;
 }
 
