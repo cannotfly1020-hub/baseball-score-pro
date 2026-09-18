@@ -292,15 +292,27 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         white-space: nowrap !important;
     }
 
-   /* 右端の下矢印エリア（ラッパーコンテナごと）を完全に消去 */
-    div[data-testid="stForm"] div[data-baseweb="select"] [aria-hidden="true"] {
-        display: none !important;
-    }
+   /* ---------------------------------------------------
+       PCプルダウン：矢印を完全消去 ＋ 文字幅の強制100%解放
+       =================================================== */
+    /* 1. 右端の矢印アイコン周辺（SVG、コンテナ、末尾要素）を強制消去 */
     div[data-testid="stForm"] div[data-baseweb="select"] svg,
-    div[data-testid="stForm"] div[data-baseweb="select"] span[data-baseweb="icon"] {
+    div[data-testid="stForm"] div[data-baseweb="select"] > div > div:last-child,
+    div[data-testid="stForm"] div[data-baseweb="select"] [data-baseweb="icon"] {
         display: none !important;
         width: 0 !important;
-        height: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        visibility: hidden !important;
+    }
+
+    /* 2. 文字表示枠：右側のスペースを限界まで広げて文字欠けを防止 */
+    div[data-testid="stForm"] div[data-baseweb="select"] > div > div:first-child {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-right: 0px !important;
     }
     }
 
