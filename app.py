@@ -97,7 +97,7 @@ button * {
    @media (min-width: 768px) {
     /* 1. サイドバー全体の横幅を指定（例: 260px に調整） */
     section[data-testid="stSidebar"] {
-        width: 260px !important;
+        width: 240px !important;
         min-width: 260px !important;
     }
 
