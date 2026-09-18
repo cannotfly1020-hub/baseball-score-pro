@@ -287,7 +287,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
     div[data-testid="stForm"] div[data-baseweb="select"] div[aria-hidden="true"],
     div[data-testid="stForm"] div[data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
     div[data-testid="stForm"] div[data-baseweb="select"] span {
-        font-size: 0.72rem !important;
+        font-size: 0.68rem !important;
         letter-spacing: -0.5px !important;
         white-space: nowrap !important;
     }
