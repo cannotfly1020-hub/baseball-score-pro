@@ -1,8 +1,8 @@
+import io
 import json
 from datetime import datetime
 import pandas as pd
 import streamlit as st
-from utils.data_calc import create_integrated_excel
 
 st.set_page_config(
     page_title="学童野球スコア統合名鑑＆アワード",
@@ -59,6 +59,30 @@ button * {
 </style>
 """, unsafe_allow_html=True)
 
+def create_integrated_excel(compiled_batting: list, compiled_pitching: list) -> bytes:
+    """打撃・投手の統合成績および選手別個人シート付きExcel"""
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        if compiled_batting:
+            pd.DataFrame(compiled_batting).to_excel(writer, sheet_name="全打席成績一覧", index=False)
+        if compiled_pitching:
+            pd.DataFrame(compiled_pitching).to_excel(writer, sheet_name="全投手成績一覧", index=False)
+
+        df_bat = pd.DataFrame(compiled_batting) if compiled_batting else pd.DataFrame()
+        all_players = set()
+        if not df_bat.empty:
+            all_players.update(df_bat["player_name"].dropna().unique())
+
+        for p in all_players:
+            p_str = str(p).strip()
+            if not p_str:
+                continue
+            sheet_title = p_str[:28].replace("/", "_").replace("\\", "_")
+            p_bat = df_bat[df_bat["player_name"] == p]
+            p_bat.to_excel(writer, sheet_name=sheet_title, index=False)
+            
+    return output.getvalue()
+
 if "all_matches_data" not in st.session_state:
     st.session_state.all_matches_data = {}
 if "all_pitchers_data" not in st.session_state:
@@ -102,7 +126,6 @@ else:
     df_bat = pd.DataFrame(compiled_bat) if compiled_bat else pd.DataFrame()
     df_pit = pd.DataFrame(compiled_pit) if compiled_pit else pd.DataFrame()
 
-    # 打撃アワード
     st.subheader("🎖️ チームタイトル・アワード（打撃部門）")
     if not df_bat.empty:
         df_bat["total_hits"] = df_bat["hits"] + df_bat["doubles"] + df_bat["triples"] + df_bat["homeruns"]
@@ -120,7 +143,6 @@ else:
         if not sb_l.empty and sb_l.iloc[0] > 0:
             c4.metric("スピードスター賞(盗塁)", f"{sb_l.index[0]} 選手", f"{int(sb_l.iloc[0])} 個")
 
-    # 投手アワード
     if not df_pit.empty:
         st.divider()
         st.subheader("🎖️ チームタイトル・アワード（投手部門・学童6回基準）")
@@ -141,7 +163,6 @@ else:
             if not era_calc.empty:
                 pc3.metric("最優秀防御率", f"{era_calc.index[0]} 投手", f"{era_calc.iloc[0]:.2f}")
 
-    # 選手名鑑
     st.divider()
     st.subheader("⚾️ デジタル選手名鑑（打撃＆投手通算）")
     all_p_names = sorted(list(set(df_bat["player_name"].dropna().tolist() + df_pit["player_name"].dropna().tolist())))
