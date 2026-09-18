@@ -130,31 +130,33 @@ button * {
     /* ===================================================
        サイドバー開閉ボタン：背景透明 ＋ 金枠 ＋ 金色アイコン
        =================================================== */
-    /* 開いている時の閉じるボタン ＆ 閉じている時の再表示ボタン */
+    /* 1. ボタン枠本体：背景透明 ＋ 金色の枠線 */
+    [data-testid="stSidebarCollapseButton"] button,
     button[data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarHeader"] button,
     [data-testid="stSidebarCollapsedControl"] button {
         background-color: transparent !important;
         border: 1.5px solid #d4af37 !important;
         border-radius: 6px !important;
         padding: 4px 6px !important;
-        transition: all 0.2s ease-in-out !important;
     }
 
-    /* 矢印アイコン（SVG）の色をゴールドに変更 */
-    button[data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarCollapsedControl"] button svg,
-    button[data-testid="stSidebarCollapseButton"] svg path,
-    [data-testid="stSidebarCollapsedControl"] button svg path {
-        fill: #ffd700 !important;
+    /* 2. 矢印アイコン（SVG・パス・文字色すべてを金色に強制） */
+    [data-testid="stSidebarCollapseButton"] *,
+    [data-testid="stSidebarHeader"] button *,
+    [data-testid="stSidebarCollapsedControl"] * {
         color: #ffd700 !important;
+        fill: #ffd700 !important;
         stroke: #ffd700 !important;
     }
 
-    /* マウスを重ねた（ホバー）時の演出 */
+    /* 3. マウスを重ねた（ホバー）時の演出 */
+    [data-testid="stSidebarCollapseButton"] button:hover,
     button[data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="stSidebarHeader"] button:hover,
     [data-testid="stSidebarCollapsedControl"] button:hover {
-        background-color: rgba(212, 175, 55, 0.15) !important;
-        box-shadow: 0 0 8px rgba(212, 175, 55, 0.4) !important;
+        background-color: rgba(212, 175, 55, 0.2) !important;
+        box-shadow: 0 0 8px rgba(212, 175, 55, 0.5) !important;
     }
 }
 </style>
