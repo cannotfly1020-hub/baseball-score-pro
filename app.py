@@ -4,48 +4,93 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
+# ==========================================
+# ページ定義（サイドバーの「app」を「🏠 ホーム」に変更）
+# ==========================================
+p_home = st.Page("app.py", title="ホーム", icon="🏠", default=True)
+p_bat = st.Page("pages/1_⚾️_打撃成績入力.py", title="打撃成績入力", icon="⚾️")
+p_pit = st.Page("pages/2_🛡️_投手成績入力.py", title="投手成績入力", icon="🛡️")
+
+pg = st.navigation([p_home, p_bat, p_pit])
+
 st.set_page_config(
     page_title="学童野球スコア統合名鑑＆アワード",
     page_icon="⚾️",
     layout="wide",
 )
 
+# ----------------------------------------------------
+# チームカラー UIデザイン（スマホ完全維持 ＆ PC最適化版）
+# ----------------------------------------------------
 st.markdown("""
 <style>
-/* 1. 画面全体の背景：天然芝の深緑 */
+/* 1. 背景：天然芝の深緑 */
 .stApp {
     background-color: #0f1f17 !important;
     color: #f0f4f1 !important;
 }
 
-/* 2. スマホ上部スペース */
+/* スマホ用の上部余白（維持） */
 .block-container {
-    padding-top: 3.8rem !important;
+    padding-top: 3.5rem !important;
     padding-bottom: 2rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
 }
 
-/* 3. 見出し・タイトルの装飾 */
-h1, h2, h3, h4 {
-    color: #ffffff !important;
+/* PC画面（横幅768px以上）のみ余白をキュッと引き締める */
+@media (min-width: 768px) {
+    .block-container {
+        padding-top: 1.8rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 1300px !important;
+    }
 }
 
-/* 4. メトリック数値：金色 */
+/* 見出し・タイトルの装飾 */
+h1, h2, h3, h4 {
+    color: #ffffff !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* キャプション・説明文の視認性改善（沈まないよう白・明色に統一） */
+div[data-testid="stCaptionContainer"] p {
+    color: #c2d6cb !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+}
+
+/* メトリック数値：金色 */
 div[data-testid="stMetricValue"] {
     color: #ffd700 !important;
     font-weight: bold !important;
+    font-size: 1.8rem !important;
+}
+div[data-testid="stMetricLabel"] p {
+    color: #ffffff !important;
+    font-weight: 600 !important;
 }
 
-/* 5. ファイルアップローダー */
+/* ファイルアップローダー */
 [data-testid="stFileUploader"] {
     background-color: #172d22 !important;
-    border: 1px dashed #d4af37 !important;
+    border: 1.5px dashed #d4af37 !important;
     border-radius: 10px !important;
-    padding: 10px !important;
+    padding: 12px !important;
 }
 
-/* 6. ボタン：クリムゾンレッド ＋ 金枠 ＋ 白文字 */
+/* アワード枠カード */
+.award-card {
+    background-color: #1b382b;
+    border: 1px solid #2d5a45;
+    border-top: 3px solid #d4af37;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* ボタン：クリムゾンレッド ＋ 金枠 ＋ 白文字 */
 button[kind="primary"], button[kind="secondary"] {
     background-color: #991b1b !important;
     color: #ffffff !important;
@@ -89,7 +134,7 @@ if "all_pitchers_data" not in st.session_state:
     st.session_state.all_pitchers_data = {}
 
 st.title("⚾️ 学童野球 スコア統合集計＆デジタル名鑑")
-st.caption("左側のサイドバーメニューから「1_⚾️_打撃成績入力」または「2_🛡️_投手成績入力」を選んで解析・編集を行ってください。")
+st.caption("左側のサイドバーメニューから「⚾️ 打撃成績入力」または「🛡️ 投手成績入力」を選んで解析・編集を行ってください。")
 
 with st.expander("📂 作業バックアップ（JSON）を読み込む / 保存する", expanded=False):
     up_backup = st.file_uploader("保存済みバックアップJSONファイルを選択", type=["json"])
@@ -121,7 +166,7 @@ compiled_bat = st.session_state.get("compiled_records", [])
 compiled_pit = st.session_state.get("compiled_pitchers", [])
 
 if not compiled_bat and not compiled_pit:
-    st.info("👈 まず左側のメニューから各成績入力ページを開き、スコアの確定を行ってください。")
+    st.info("👈 左側のメニューから各成績入力ページを開き、スコアを解析・確定すると、ここにチームタイトル・通算名鑑・統合Excelが表示されます。")
 else:
     df_bat = pd.DataFrame(compiled_bat) if compiled_bat else pd.DataFrame()
     df_pit = pd.DataFrame(compiled_pit) if compiled_pit else pd.DataFrame()
