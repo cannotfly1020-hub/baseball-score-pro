@@ -292,27 +292,15 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         white-space: nowrap !important;
     }
 
-   /* ---------------------------------------------------
-       PCプルダウン：矢印を完全消去 ＋ 文字幅の強制100%解放
-       =================================================== */
-    /* 1. 右端の矢印アイコン周辺（SVG、コンテナ、末尾要素）を強制消去 */
+   /* 右端の下矢印エリア（ラッパーコンテナごと）を完全に消去 */
+    div[data-testid="stForm"] div[data-baseweb="select"] [aria-hidden="true"] {
+        display: none !important;
+    }
     div[data-testid="stForm"] div[data-baseweb="select"] svg,
-    div[data-testid="stForm"] div[data-baseweb="select"] > div > div:last-child,
-    div[data-testid="stForm"] div[data-baseweb="select"] [data-baseweb="icon"] {
+    div[data-testid="stForm"] div[data-baseweb="select"] span[data-baseweb="icon"] {
         display: none !important;
         width: 0 !important;
-        min-width: 0 !important;
-        max-width: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        visibility: hidden !important;
-    }
-
-    /* 2. 文字表示枠：右側のスペースを限界まで広げて文字欠けを防止 */
-    div[data-testid="stForm"] div[data-baseweb="select"] > div > div:first-child {
-        width: 100% !important;
-        max-width: 100% !important;
-        padding-right: 0px !important;
+        height: 0 !important;
     }
     }
 
@@ -533,131 +521,71 @@ if st.session_state.all_matches_data:
             st.session_state.all_matches_data[selected_match_file].append(new_player_template)
             st.rerun()
 
-col_img, col_grid = st.columns([0.9, 1.6])
+    col_img, col_grid = st.columns([1.1, 1.3])
 
     with col_img:
         st.markdown(f"#### 📷 原本画像: `{selected_match_file}`")
         zoom_val = st.slider("🔍 拡大率", min_value=100, max_value=350, value=150, step=25, format="%d%%")
-
-        box_height = 320 if is_mobile_sticky else 500
-        sticky_class = "sticky-mobile-viewer" if is_mobile_sticky else ""
-
-        viewer_html = f"""
-        <div id="drag-viewer" class="{sticky_class}" style="
-            width: 100%; 
-            height: {box_height}px; 
-            overflow: auto; 
-            border: 2px solid #d4af37; 
-            border-radius: 8px; 
-            background-color: #111; 
-            cursor: grab; 
-            user-select: none;
-            -webkit-user-select: none;
-        ">
-            <img id="score-img" src="data:image/jpeg;base64,{current_b64}" style="
-                width: {zoom_val}%; 
-                max-width: none; 
-                display: block; 
-                margin: 0 auto; 
-                pointer-events: none;
-            " />
-        </div>
-
-        <script>
-            const ele = document.getElementById('drag-viewer');
-            let pos = {{ top: 0, left: 0, x: 0, y: 0 }};
-
-            const mouseDownHandler = function (e) {{
-                ele.style.cursor = 'grabbing';
-                pos = {{
-                    left: ele.scrollLeft,
-                    top: ele.scrollTop,
-                    x: e.clientX,
-                    y: e.clientY,
-                }};
-                document.addEventListener('mousemove', mouseMoveHandler);
-                document.addEventListener('mouseup', mouseUpHandler);
-            }};
-
-            const mouseMoveHandler = function (e) {{
-                const dx = e.clientX - pos.x;
-                const dy = e.clientY - pos.y;
-                ele.scrollTop = pos.top - dy;
-                ele.scrollLeft = pos.left - dx;
-            }};
-
-            const mouseUpHandler = function () {{
-                ele.style.cursor = 'grab';
-                document.removeEventListener('mousemove', mouseMoveHandler);
-                document.removeEventListener('mouseup', mouseUpHandler);
-            }};
-
-            ele.addEventListener('mousedown', mouseDownHandler);
-        </script>
-        """
-        components.html(viewer_html, height=box_height + 25)
-
-with col_img:
-        st.markdown(f"#### 📷 原本画像: `{selected_match_file}`")
-        zoom_val = st.slider("🔍 拡大率", min_value=100, max_value=350, value=150, step=25, format="%d%%")
         
-        box_height = 320 if is_mobile_sticky else 500
+        box_height = 320 if is_mobile_sticky else 620
         sticky_class = "sticky-mobile-viewer" if is_mobile_sticky else ""
 
         viewer_html = f"""
-        <div id="drag-viewer" class="{sticky_class}" style="
-            width: 100%; 
-            height: {box_height}px; 
-            overflow: auto; 
-            border: 2px solid #d4af37; 
-            border-radius: 8px; 
-            background-color: #111; 
-            cursor: grab; 
-            user-select: none;
-            -webkit-user-select: none;
-        ">
-            <img id="score-img" src="data:image/jpeg;base64,{current_b64}" style="
-                width: {zoom_val}%; 
-                max-width: none; 
-                display: block; 
-                margin: 0 auto; 
-                pointer-events: none;
-            " />
+        <div class="{sticky_class}" style="width:100%; height:{box_height}px; overflow:auto; border:2px solid #555; border-radius:8px; background-color:#222; text-align:center;">
+            <img src="data:image/jpeg;base64,{current_b64}" style="width:{zoom_val}%; max-width:none; transition:width 0.15s ease-in-out; cursor:grab;" />
         </div>
-
-        <script>
-            const ele = document.getElementById('drag-viewer');
-            let pos = {{ top: 0, left: 0, x: 0, y: 0 }};
-
-            const mouseDownHandler = function (e) {{
-                ele.style.cursor = 'grabbing';
-                pos = {{
-                    left: ele.scrollLeft,
-                    top: ele.scrollTop,
-                    x: e.clientX,
-                    y: e.clientY,
-                }};
-                document.addEventListener('mousemove', mouseMoveHandler);
-                document.addEventListener('mouseup', mouseUpHandler);
-            }};
-
-            const mouseMoveHandler = function (e) {{
-                const dx = e.clientX - pos.x;
-                const dy = e.clientY - pos.y;
-                ele.scrollTop = pos.top - dy;
-                ele.scrollLeft = pos.left - dx;
-            }};
-
-            const mouseUpHandler = function () {{
-                ele.style.cursor = 'grab';
-                document.removeEventListener('mousemove', mouseMoveHandler);
-                document.removeEventListener('mouseup', mouseUpHandler);
-            }};
-
-            ele.addEventListener('mousedown', mouseDownHandler);
-        </script>
         """
-        components.html(viewer_html, height=box_height + 25)
+        components.html(viewer_html, height=box_height + 20)
+
+    with col_grid:
+        st.markdown("#### 🎯 打席盤面エディタ")
+        st.caption("タブを指で横にスワイプして選手を選択し、修正後は「保存」を押してください。")
+
+        tab_labels = []
+        for idx, player in enumerate(current_players):
+            u_num = str(player.get("uniform_number", "")).strip()
+            num_str = f"#{u_num} " if u_num else ""
+            p_name = str(player.get("player_name", "選手")).strip()
+            sub_tag = "(代)" if player.get("is_substitute") else ""
+            tab_labels.append(f"{num_str}{p_name}{sub_tag}")
+
+        player_tabs = st.tabs(tab_labels)
+
+        for idx, (p_tab, player) in enumerate(zip(player_tabs, current_players)):
+            with p_tab:
+                is_sub = player.get("is_substitute", False)
+                order_val = player.get("batting_order", idx + 1)
+                u_num_init = str(player.get("uniform_number", "")).strip()
+                p_name_init = str(player.get("player_name", "")).strip()
+
+                with st.form(key=f"form_player_{selected_match_file}_{idx}"):
+                    st.markdown(f"##### **【{order_val}番】 #{u_num_init or '-'} {p_name_init} {'（途中交代・代打）' if is_sub else '（先発）'}**")
+
+                    p_cols = st.columns([1, 2, 3])
+                    u_num = p_cols[0].text_input("背番号", value=u_num_init, key=f"{selected_match_file}_num_{idx}")
+                    p_name = p_cols[1].text_input("選手名（漢字）", value=p_name_init, key=f"{selected_match_file}_name_{idx}")
+                    hl = p_cols[2].text_input("ハイライトメモ", value=str(player.get("highlight", "")), key=f"{selected_match_file}_hl_{idx}")
+
+                    stat_c1, stat_c2 = st.columns(2)
+                    rbi_val = stat_c1.number_input("打点 (RBI)", min_value=0, max_value=20, value=int(player.get("rbi", 0)), step=1, key=f"{selected_match_file}_rbi_{idx}")
+                    sb_val = stat_c2.number_input("盗塁数 (SB)", min_value=0, max_value=20, value=int(player.get("stolen_bases", 0)), step=1, key=f"{selected_match_file}_sb_{idx}")
+
+                    st.markdown("**各回の打席結果（◇ダイヤモンド）**")
+                    inn_cols = st.columns(7)
+                    new_innings = {}
+                    for i_idx, inn_str in enumerate(["1", "2", "3", "4", "5", "6", "7"]):
+                        with inn_cols[i_idx]:
+                            st.markdown(f"<div class='inning-header'><span class='diamond-icon'>◇</span>{inn_str}回</div>", unsafe_allow_html=True)
+                            cur_val = player.get("innings", {}).get(inn_str, "なし")
+                            default_idx = RESULT_OPTIONS.index(cur_val) if cur_val in RESULT_OPTIONS else 0
+                            sel = st.selectbox(
+                                f"{inn_str}回",
+                                RESULT_OPTIONS,
+                                index=default_idx,
+                                key=f"{selected_match_file}_inn_{idx}_{inn_str}",
+                                label_visibility="collapsed"
+                            )
+                            new_innings[inn_str] = sel
 
                     st.write("")
                     submitted = st.form_submit_button("💾 この選手の変更を保存", use_container_width=True)
