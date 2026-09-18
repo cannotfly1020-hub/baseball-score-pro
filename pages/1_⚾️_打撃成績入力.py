@@ -533,13 +533,15 @@ if st.session_state.all_matches_data:
             st.session_state.all_matches_data[selected_match_file].append(new_player_template)
             st.rerun()
 
-    col_img, col_grid = st.columns([0.9, 1.6])
+col_img, col_grid = st.columns([0.9, 1.6])
 
-    # PC表示時の高さを620pxから500pxに縮小（下の余白をカット）
+    with col_img:
+        st.markdown(f"#### 📷 原本画像: `{selected_match_file}`")
+        zoom_val = st.slider("🔍 拡大率", min_value=100, max_value=350, value=150, step=25, format="%d%%")
+
         box_height = 320 if is_mobile_sticky else 500
         sticky_class = "sticky-mobile-viewer" if is_mobile_sticky else ""
 
-        # マウスドラッグで掴んでスクロール（パン移動）できるビューワー
         viewer_html = f"""
         <div id="drag-viewer" class="{sticky_class}" style="
             width: 100%; 
