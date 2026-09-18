@@ -95,63 +95,102 @@ div[data-testid="stForm"] {
     border: 1px solid #dcd6cd !important;
     border-left: 6px solid #991b1b !important;
     border-radius: 8px !important;
-    padding: 14px 12px !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+    padding: 16px 14px !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important;
 }
 
+/* カード内の見出し・全ラベルを真っ黒＆くっきり太字に強制 */
+div[data-testid="stForm"] h5,
 div[data-testid="stForm"] label,
-div[data-testid="stForm"] h5 {
+div[data-testid="stForm"] label p,
+div[data-testid="stForm"] span,
+div[data-testid="stForm"] p {
+    color: #111111 !important;
+    font-weight: 700 !important;
+    font-size: 0.92rem !important;
+}
+
+/* 9. 入力欄（テキスト・数値）：白背景・黒文字・見やすいグレー枠 */
+div[data-testid="stForm"] input[type="text"],
+div[data-testid="stForm"] input[type="number"] {
+    background-color: #f8faf9 !important;
+    color: #111111 !important;
+    font-weight: bold !important;
+    border: 1.5px solid #b0bec5 !important;
+    border-radius: 6px !important;
+}
+
+/* 数値入力（打点・盗塁）の「＋」「−」ステップボタンを上品なグレーに */
+div[data-testid="stForm"] [data-testid="stNumberInput"] button {
+    background-color: #e2e8f0 !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+    box-shadow: none !important;
+}
+div[data-testid="stForm"] [data-testid="stNumberInput"] button * {
+    color: #1e293b !important;
+    fill: #1e293b !important;
+}
+
+/* 10. 【最重要】各回の打席プルダウン（赤潰れを解消し、白地・くっきり黒文字へ） */
+div[data-testid="stForm"] div[data-baseweb="select"],
+div[data-testid="stForm"] div[data-baseweb="select"] > div {
+    background-color: #ffffff !important;
+    border: 1.5px solid #2d5a45 !important;
+    border-radius: 6px !important;
+    min-height: 38px !important;
+}
+div[data-testid="stForm"] div[data-baseweb="select"] * {
     color: #111111 !important;
     font-weight: bold !important;
 }
-
-/* 9. 【スマホ最適化】セレクトボックスのキーボード立ち上がりを完全防止 */
+div[data-testid="stForm"] div[data-baseweb="select"] svg {
+    fill: #2d5a45 !important;
+}
+/* スマホでのキーボード立ち上がり防止 */
 div[data-baseweb="select"] input {
     pointer-events: none !important;
     caret-color: transparent !important;
     user-select: none !important;
 }
-div[data-baseweb="select"] {
-    cursor: pointer !important;
+
+/* 11. イニング枠ヘッダー（◇ ダイヤモンド） */
+.inning-header {
+    text-align: center;
+    background-color: #1b382b !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    font-size: 0.85rem;
+    padding: 5px 0;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    border-bottom: 2.5px solid #d4af37;
+}
+.diamond-icon {
+    color: #ffd700 !important;
+    margin-right: 3px;
+    font-size: 0.9rem;
 }
 
-/* 10. 保存ボタン（クリムゾンレッド ＋ 金枠 ＋ 白文字） */
-button[kind="primary"], button[kind="secondary"],
+/* 12. アクションボタン（変更を保存・AI解析・Excel作成）のみクリムゾンレッド ＋ 金枠 */
 div[data-testid="stForm"] button[kind="secondaryFormSubmit"],
-div[data-testid="stForm"] button[data-testid="stBaseButton-secondaryFormSubmit"],
-div[data-testid="stForm"] button {
+button[data-testid="stBaseButton-primary"],
+button[data-testid="stBaseButton-secondary"] {
     background-color: #991b1b !important;
     color: #ffffff !important;
     border: 2px solid #d4af37 !important;
     border-radius: 8px !important;
     font-weight: bold !important;
     font-size: 0.95rem !important;
-    padding: 10px !important;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
 }
-button *, div[data-testid="stForm"] button * {
+div[data-testid="stForm"] button[kind="secondaryFormSubmit"] *,
+button[data-testid="stBaseButton-primary"] *,
+button[data-testid="stBaseButton-secondary"] * {
     color: #ffffff !important;
 }
 
-/* 11. イニング枠ヘッダー（◇ ダイヤモンド） */
-.inning-header {
-    text-align: center;
-    background-color: #1b382b;
-    color: #ffffff !important;
-    font-weight: bold;
-    font-size: 0.8rem;
-    padding: 4px 0;
-    border-radius: 4px;
-    margin-bottom: 4px;
-    border-bottom: 2px solid #d4af37;
-}
-.diamond-icon {
-    color: #ffd700 !important;
-    margin-right: 3px;
-    font-size: 0.85rem;
-}
-
-/* 12. 固定画像ビューワー */
+/* 13. 固定画像ビューワー */
 .sticky-mobile-viewer {
     position: -webkit-sticky;
     position: sticky;
@@ -168,20 +207,15 @@ button *, div[data-testid="stForm"] button * {
 /* ===================================================
    全端末共通：サイドバーの「app」を「🏠 ホーム」に置換
    =================================================== */
-/* 1. 一番上のリンク枠を基準位置に設定 */
 section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a {
     position: relative !important;
 }
-
-/* 2. 最上段の「app」の文字・要素を、PCの白文字指定に勝つ強度で100%完全透明化 */
 section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a *,
 section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child span,
 section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child p {
     color: transparent !important;
     opacity: 0 !important;
 }
-
-/* 3. 「🏠 ホーム」を下のメニューと揃う位置に重ねて表示 */
 section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a::after {
     content: "🏠 ホーム" !important;
     position: absolute !important;
@@ -195,8 +229,6 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a::
     pointer-events: none !important;
     white-space: nowrap !important;
 }
-
-/* 4. ホームが選択されている時は文字を金色にする */
 section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[aria-selected="true"]::after {
     color: #ffd700 !important;
 }
@@ -205,7 +237,6 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
    PCモニター表示専用（横幅768px以上）の最適化
    =================================================== */
 @media (min-width: 768px) {
-    /* PCでの無駄な上下余白を圧縮し、最大幅を適正化 */
     .block-container {
         padding-top: 2.0rem !important;
         padding-bottom: 2.0rem !important;
@@ -214,66 +245,49 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         max-width: 1400px !important;
     }
 
-    /* PCモニターで沈んで見えにくかった説明文・案内文のコントラストを大幅強化 */
     div[data-testid="stCaptionContainer"] p {
         color: #e0ece5 !important;
         font-size: 1.0rem !important;
         font-weight: 500 !important;
     }
 
-    /* 各種テキスト・小見出しの白文字コントラスト強化 */
-    p, span, label {
+    /* 画面背景側の一般テキスト（カード外）のコントラスト強化 */
+    .stApp > div p, .stApp > div span {
         color: #f0f4f1 !important;
     }
 
-    /* 区切り線（divider）の余白を適正に縮小 */
     hr {
         margin-top: 1.5rem !important;
         margin-bottom: 1.5rem !important;
         border-color: #2d5a45 !important;
     }
 
-    /* 1. サイドバー全体の横幅を指定 */
+    /* サイドバー全体の背景・枠・文字色 */
     section[data-testid="stSidebar"] {
         width: 180px !important;
         min-width: 180px !important;
+        border-right: 3px solid #d4af37 !important;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5) !important;
     }
-
-    /* 2. サイドバー全体の背景：深みのあるクリムゾンレッド */
     section[data-testid="stSidebar"],
     section[data-testid="stSidebar"] > div {
         background-color: #801212 !important;
     }
-
-    /* 3. サイドバー右端：金色の縦ライン */
-    section[data-testid="stSidebar"] {
-        border-right: 3px solid #d4af37 !important;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5) !important;
-    }
-
-    /* 4. メニュー文字色：赤背景で見やすい純白＋太字 */
     section[data-testid="stSidebar"] span,
     section[data-testid="stSidebar"] p {
         color: #ffffff !important;
         font-weight: bold !important;
     }
-
-    /* 5. 選択中のメニュー項目の文字色（ゴールド） */
     section[data-testid="stSidebar"] [aria-selected="true"] span,
     section[data-testid="stSidebar"] [aria-selected="true"] p {
         color: #ffd700 !important;
         font-weight: bold !important;
     }
 
-    /* ===================================================
-       サイドバー開閉ボタン：背景透明 ＋ 金枠 ＋ 金色アイコン
-       =================================================== */
-    /* 左上ヘッダー全体の白背景を完全に透明化 */
+    /* 開閉ボタン本体（枠線を金色・背景透明化） */
     header[data-testid="stHeader"] {
         background-color: transparent !important;
     }
-
-    /* 開閉ボタン本体（枠線を金色・背景透明化） */
     [data-testid="stSidebarCollapsedControl"],
     [data-testid="stSidebarCollapsedControl"] button,
     [data-testid="stSidebarCollapseButton"] button,
@@ -286,8 +300,6 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         padding: 4px 6px !important;
         box-shadow: none !important;
     }
-
-    /* 矢印アイコン（開閉どちらの状態でも金色に統一） */
     [data-testid="stSidebarCollapsedControl"] *,
     [data-testid="stSidebarCollapseButton"] *,
     [data-testid="stSidebarHeader"] button * {
@@ -295,8 +307,6 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         fill: #ffd700 !important;
         stroke: #ffd700 !important;
     }
-
-    /* マウスホバー時の上品なゴールド演出 */
     [data-testid="stSidebarCollapsedControl"]:hover,
     [data-testid="stSidebarCollapsedControl"] button:hover,
     [data-testid="stSidebarCollapseButton"]:hover,
