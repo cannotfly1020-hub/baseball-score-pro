@@ -671,7 +671,38 @@ if st.session_state.all_matches_data:
 
     if "compiled_records" in st.session_state:
         st.divider()
-        excel_data = create_excel_from_compiled(st.session_state["compiled_records"])
+
+        # Excelの列名を英語から分かりやすい日本語へ一括変換
+        column_mapping = {
+            'source_file': '試合名',
+            'batting_order': '打順',
+            'uniform_number': '背番号',
+            'player_name': '選手名',
+            'is_substitute': '途中出場',
+            'plate_appearances': '打席数',
+            'at_bats': '打数',
+            'hits': '安打',
+            'doubles': '二塁打',
+            'triples': '三塁打',
+            'homeruns': '本塁打',
+            'walks': '四球',
+            'deadballs': '死球',
+            'strikeouts': '三振',
+            'sacrifice_hits': '犠打',
+            'sacrifice_flies': '犠飛',
+            'rbi': '打点',
+            'stolen_bases': '盗塁',
+            'highlight': '寸評・ハイライト'
+        }
+
+        # 日本語列名に置換したデータを適用
+        records_jp = []
+        for rec in st.session_state["compiled_records"]:
+            new_rec = {column_mapping.get(k, k): v for k, v in rec.items()}
+            records_jp.append(new_rec)
+
+        excel_data = create_excel_from_compiled(records_jp)
+
         st.download_button(
             label=f"📥 全{len(st.session_state.all_matches_data)}試合分 選手名別シート付きExcelをダウンロード",
             data=excel_data,
