@@ -535,19 +535,65 @@ if st.session_state.all_matches_data:
 
     col_img, col_grid = st.columns([0.9, 1.6])
 
-    with col_img:
-        st.markdown(f"#### 📷 原本画像: `{selected_match_file}`")
-        zoom_val = st.slider("🔍 拡大率", min_value=100, max_value=350, value=150, step=25, format="%d%%")
-        
-        box_height = 320 if is_mobile_sticky else 620
+    # PC表示時の高さを620pxから500pxに縮小（下の余白をカット）
+        box_height = 320 if is_mobile_sticky else 500
         sticky_class = "sticky-mobile-viewer" if is_mobile_sticky else ""
 
+        # マウスドラッグで掴んでスクロール（パン移動）できるビューワー
         viewer_html = f"""
-        <div class="{sticky_class}" style="width:100%; height:{box_height}px; overflow:auto; border:2px solid #555; border-radius:8px; background-color:#222; text-align:center;">
-            <img src="data:image/jpeg;base64,{current_b64}" style="width:{zoom_val}%; max-width:none; transition:width 0.15s ease-in-out; cursor:grab;" />
+        <div id="drag-viewer" class="{sticky_class}" style="
+            width: 100%; 
+            height: {box_height}px; 
+            overflow: auto; 
+            border: 2px solid #d4af37; 
+            border-radius: 8px; 
+            background-color: #111; 
+            cursor: grab; 
+            user-select: none;
+            -webkit-user-select: none;
+        ">
+            <img id="score-img" src="data:image/jpeg;base64,{current_b64}" style="
+                width: {zoom_val}%; 
+                max-width: none; 
+                display: block; 
+                margin: 0 auto; 
+                pointer-events: none;
+            " />
         </div>
+
+        <script>
+            const ele = document.getElementById('drag-viewer');
+            let pos = {{ top: 0, left: 0, x: 0, y: 0 }};
+
+            const mouseDownHandler = function (e) {{
+                ele.style.cursor = 'grabbing';
+                pos = {{
+                    left: ele.scrollLeft,
+                    top: ele.scrollTop,
+                    x: e.clientX,
+                    y: e.clientY,
+                }};
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+            }};
+
+            const mouseMoveHandler = function (e) {{
+                const dx = e.clientX - pos.x;
+                const dy = e.clientY - pos.y;
+                ele.scrollTop = pos.top - dy;
+                ele.scrollLeft = pos.left - dx;
+            }};
+
+            const mouseUpHandler = function () {{
+                ele.style.cursor = 'grab';
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            }};
+
+            ele.addEventListener('mousedown', mouseDownHandler);
+        </script>
         """
-        components.html(viewer_html, height=box_height + 20)
+        components.html(viewer_html, height=box_height + 25)
 
     with col_grid:
         st.markdown("#### 🎯 打席盤面エディタ")
