@@ -1,14 +1,22 @@
+import io
 import json
 import base64
+from datetime import datetime
 from google import genai
 from google.genai import types
 import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
-# 独立させたモジュールから読み込み
+# 独立モジュールからの正確なインポート（途切れなし）
 from prompts.pitching_prompts import PITCHER_PROMPT
-from utils.pitching_utils import enhance_sharpness, calculate_pitcher_stats_from_grid, create_pitcher_excel_from_compiled, IP_OPTIONS, DECISION_OPTIONSimport io
+from utils.pitching_utils import (
+    enhance_sharpness,
+    calculate_pitcher_stats_from_grid,
+    create_pitcher_excel_from_compiled,
+    IP_OPTIONS,
+    DECISION_OPTIONS
+)
 
 st.set_page_config(
     page_title="投手成績解析＆エディタ",
@@ -16,7 +24,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# 打撃アプリ完全共通のチームカラーUIデザイン
+# 打撃アプリと完全共通のチームカラーUIデザイン
 st.markdown("""
 <style>
 /* 1. 背景：天然芝の深緑 */
@@ -111,6 +119,8 @@ div[data-baseweb="select"] {
 }
 
 /* 9. 保存ボタン */
+div[data-testid="stForm"] button[kind="secondaryFormSubmit"],
+div[data-testid="stForm"] button[data-testid="stBaseButton-secondaryFormSubmit"],
 div[data-testid="stForm"] button {
     background-color: #991b1b !important;
     color: #ffffff !important;
@@ -146,11 +156,41 @@ if "all_pitchers_data" not in st.session_state:
 if "pitcher_images_b64" not in st.session_state:
     st.session_state.pitcher_images_b64 = {}
 
-api_key = st.secrets.get("GEMINI_API_KEY") or st.sidebar.text_input("Gemini APIキー", type="password")
+api_key = st.secrets.get("GEMINI_API_KEY")
+if not api_key:
+    api_key = st.sidebar.text_input("管理者APIキー (Gemini)", type="password")
+
 client = genai.Client(api_key=api_key) if api_key else None
 
-st.title("🛡️ 相手攻撃面（守備）スコア解析＆投手エディタ")
-st.caption("赤丸失点・赤線被安打・K・四死球をAIが自動集計し、自軍投手成績を算出します（相手選手名は完全除外）。")
+st.subheader("🛡️ 相手攻撃面（守備）スコア解析＆投手エディタ")
+st.caption("赤丸失点・赤線被安打・K・四死球をAIが自動集計し、自軍投手成績を算出します（相手打者名は完全除外）。")
+
+# バックアップ復元機能
+with st.expander("📂 前回の作業バックアップ（JSON）を読み込んで再開する", expanded=False):
+    backup_file = st.file_uploader(
+        "保存したバックアップJSONファイルを選択",
+        type=["json"],
+        key="pt_backup_uploader"
+    )
+    if backup_file is not None:
+        if st.button("このバックアップから投手作業を復元する", type="secondary", use_container_width=True):
+            try:
+                loaded_data = json.loads(backup_file.getvalue().decode("utf-8"))
+                if "all_pitchers_data" in loaded_data:
+                    st.session_state.all_pitchers_data = loaded_data["all_pitchers_data"]
+                    st.session_state.pitcher_images_b64 = loaded_data.get("pitcher_images_b64", {})
+                    st.success(f"🎉 全 {len(st.session_state.all_pitchers_data)} 試合分の投手データを復元しました！")
+                    st.rerun()
+                else:
+                    st.error("バックアップファイルの形式が正しくありません。")
+            except Exception as e:
+                st.error(f"バックアップ復元エラー: {e}")
+
+st.divider()
+
+if not client:
+    st.warning("Gemini APIキーを設定してください（Secrets または サイドバー）。")
+    st.stop()
 
 uploaded_files = st.file_uploader(
     "相手攻撃面（自チーム守備）スコア写真を選択（複数選択可）",
@@ -158,7 +198,7 @@ uploaded_files = st.file_uploader(
     accept_multiple_files=True
 )
 
-if uploaded_files and client:
+if uploaded_files:
     if st.button("AIで投手成績（赤丸失点・被安打等）を一括解析する", type="primary"):
         prog = st.progress(0)
         status = st.empty()
@@ -189,6 +229,21 @@ if uploaded_files and client:
 
 if st.session_state.all_pitchers_data:
     st.divider()
+
+    # バックアップダウンロード機能
+    pt_backup_payload = {
+        "all_pitchers_data": st.session_state.all_pitchers_data,
+        "pitcher_images_b64": st.session_state.pitcher_images_b64,
+        "saved_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    st.download_button(
+        label="💾 現在の投手作業状態をバックアップ保存 (JSONダウンロード)",
+        data=json.dumps(pt_backup_payload, ensure_ascii=False, indent=2),
+        file_name=f"投手成績_途中作業データ_{datetime.now().strftime('%Y%m%d_%H%M')}.json",
+        mime="application/json",
+        use_container_width=True
+    )
+
     m_files = list(st.session_state.all_pitchers_data.keys())
     c1, c2 = st.columns([2, 1])
     sel_file = c1.selectbox("📁 確認・編集する試合スコア", m_files)
@@ -204,7 +259,7 @@ if st.session_state.all_pitchers_data:
         b_h = 320 if is_sticky else 620
         viewer_html = f"""
         <div class="{'sticky-mobile-viewer' if is_sticky else ''}" style="width:100%; height:{b_h}px; overflow:auto; border:2px solid #555; border-radius:8px; background-color:#222; text-align:center;">
-            <img src="data:image/jpeg;base64,{cur_b64}" style="width:{zoom}%; max-width:none; cursor:grab;" />
+            <img src="data:image/jpeg;base64,{cur_b64}" style="width:{zoom}%; max-width:none; transition:width 0.15s ease-in-out; cursor:grab;" />
         </div>
         """
         components.html(viewer_html, height=b_h + 20)
@@ -260,6 +315,7 @@ if st.session_state.all_pitchers_data:
 
                 if st.button(f"🗑️ この投手枠（{pt.get('pitcher_name','投手')}）を削除", key=f"del_{sel_file}_{idx}"):
                     st.session_state.all_pitchers_data[sel_file].pop(idx)
+                    st.warning(f"{pt.get('pitcher_name','投手')} を削除しました。")
                     st.rerun()
 
         st.write("")
@@ -269,3 +325,14 @@ if st.session_state.all_pitchers_data:
                 compiled_pt.extend(calculate_pitcher_stats_from_grid(p_list, match_file_name=mf))
             st.session_state["compiled_pitchers"] = compiled_pt
             st.success("🎉 全投手の成績を確定しました！「ホーム」画面で統合結果を確認できます。")
+
+    if "compiled_pitchers" in st.session_state:
+        st.divider()
+        pt_excel_data = create_pitcher_excel_from_compiled(st.session_state["compiled_pitchers"])
+        st.download_button(
+            label=f"📥 全{len(st.session_state.all_pitchers_data)}試合分 投手別シート付きExcelをダウンロード",
+            data=pt_excel_data,
+            file_name="チーム通算投手成績一覧.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
