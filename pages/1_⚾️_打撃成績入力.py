@@ -669,10 +669,12 @@ if st.session_state.all_matches_data:
             st.session_state["compiled_records"] = all_compiled
             st.success(f"🎉 全 {len(st.session_state.all_matches_data)} 試合分の成績を確定統合しました！")
 
+  # ----------------------------------------------------
+    # 日本語列名 Excel生成 & ダウンロード
+    # ----------------------------------------------------
     if "compiled_records" in st.session_state:
         st.divider()
 
-        # 英語列名をきれいな日本語に変換する対応表
         column_mapping = {
             'source_file': '試合名',
             'batting_order': '打順',
@@ -695,40 +697,20 @@ if st.session_state.all_matches_data:
             'highlight': '寸評・ハイライト'
         }
 
-        # 既存ロジックを崩さず、日本語列名と選手別シートを完全生成
         excel_buffer = io.BytesIO()
         df_all = pd.DataFrame(st.session_state["compiled_records"])
-        
-        # 選手名が英語・日本語のどちらでも対応できるように判定
-        name_key = 'player_name' if 'player_name' in df_all.columns else '選手名'
 
         with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-            # 1. 全打席成績一覧（日本語ヘッダー）
             df_jp = df_all.rename(columns=column_mapping)
             df_jp.to_excel(writer, sheet_name='全打席成績一覧', index=False)
 
-            # 2. 選手名別の個別シート
-            if not df_all.empty and name_key in df_all.columns:
-                for player_val, p_df in df_all.groupby(name_key):
+            if not df_all.empty and 'player_name' in df_all.columns:
+                for player_val, p_df in df_all.groupby('player_name'):
                     sheet_name_clean = str(player_val).strip()[:30]
                     p_df_jp = p_df.rename(columns=column_mapping)
                     p_df_jp.to_excel(writer, sheet_name=sheet_name_clean, index=False)
 
         excel_data = excel_buffer.getvalue()
-
-        st.download_button(
-            label=f"📥 全{len(st.session_state.all_matches_data)}試合分 選手名別シート付きExcelをダウンロード",
-            data=excel_data,
-            file_name="チーム通算打撃成績一覧.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )タを適用
-        records_jp = []
-        for rec in st.session_state["compiled_records"]:
-            new_rec = {column_mapping.get(k, k): v for k, v in rec.items()}
-            records_jp.append(new_rec)
-
-        excel_data = create_excel_from_compiled(records_jp)
 
         st.download_button(
             label=f"📥 全{len(st.session_state.all_matches_data)}試合分 選手名別シート付きExcelをダウンロード",
