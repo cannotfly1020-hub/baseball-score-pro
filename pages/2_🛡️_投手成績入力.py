@@ -8,7 +8,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
-# 独立モジュールからの正確なインポート（途切れなし）
 from prompts.pitching_prompts import PITCHER_PROMPT
 from utils.pitching_utils import (
     enhance_sharpness,
@@ -24,7 +23,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# 打撃アプリと完全共通のチームカラーUIデザイン
 st.markdown("""
 <style>
 /* 1. 背景：天然芝の深緑 */
@@ -33,12 +31,28 @@ st.markdown("""
     color: #f0f4f1 !important;
 }
 
-/* 2. スマホ上部スペース */
+/* スマホ用の上部余白（維持） */
 .block-container {
     padding-top: 3.8rem !important;
     padding-bottom: 2rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
+}
+
+/* PC画面のみ上部と全体の余白を引き締める */
+@media (min-width: 768px) {
+    .block-container {
+        padding-top: 1.8rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 1400px !important;
+    }
+}
+
+/* 説明文・キャプションの視認性改善（白・明色でくっきり） */
+div[data-testid="stCaptionContainer"] p {
+    color: #e0ece5 !important;
+    font-size: 0.92rem !important;
+    font-weight: 500 !important;
 }
 
 /* 3. タブバー：金色アンダーライン */
@@ -50,7 +64,7 @@ st.markdown("""
     background-color: transparent !important;
     border-bottom: 2.5px solid #d4af37 !important;
     -webkit-overflow-scrolling: touch;
-    margin-bottom: 1rem !important;
+    margin-bottom: 0.8rem !important;
 }
 
 /* 4. 非選択タブ */
@@ -87,7 +101,7 @@ h1, h2, h3, h4 {
 /* 6. アップローダー */
 [data-testid="stFileUploader"] {
     background-color: #172d22 !important;
-    border: 1px dashed #d4af37 !important;
+    border: 1.5px dashed #d4af37 !important;
     border-radius: 10px !important;
     padding: 10px !important;
 }
@@ -135,6 +149,14 @@ div[data-testid="stForm"] button * {
     color: #ffffff !important;
 }
 
+/* 投手追加ボタンの視認性改善 */
+div[data-testid="stButton"] > button:has(div:contains("投手を手動追加")) {
+    background-color: #1b382b !important;
+    color: #ffffff !important;
+    border: 1.5px solid #d4af37 !important;
+    font-weight: bold !important;
+}
+
 /* 10. 固定画像ビューワー */
 .sticky-mobile-viewer {
     position: -webkit-sticky;
@@ -165,7 +187,6 @@ client = genai.Client(api_key=api_key) if api_key else None
 st.subheader("🛡️ 相手攻撃面（守備）スコア解析＆投手エディタ")
 st.caption("赤丸失点・赤線被安打・K・四死球をAIが自動集計し、自軍投手成績を算出します（相手打者名は完全除外）。")
 
-# バックアップ復元機能
 with st.expander("📂 前回の作業バックアップ（JSON）を読み込んで再開する", expanded=False):
     backup_file = st.file_uploader(
         "保存したバックアップJSONファイルを選択",
@@ -230,7 +251,6 @@ if uploaded_files:
 if st.session_state.all_pitchers_data:
     st.divider()
 
-    # バックアップダウンロード機能
     pt_backup_payload = {
         "all_pitchers_data": st.session_state.all_pitchers_data,
         "pitcher_images_b64": st.session_state.pitcher_images_b64,
@@ -265,16 +285,17 @@ if st.session_state.all_pitchers_data:
         components.html(viewer_html, height=b_h + 20)
 
     with col_form:
-        st.markdown("#### 🎯 投手成績エディタ")
-        st.caption("タブを指で横にスワイプして投手を選択し、修正後は「保存」を押してください。")
-
-        if st.button("➕ この試合に投手枠を手動追加"):
+        pt_h1, pt_h2 = st.columns([1.6, 1])
+        pt_h1.markdown("#### 🎯 投手成績エディタ")
+        if pt_h2.button("➕ 投手を手動追加", use_container_width=True):
             st.session_state.all_pitchers_data[sel_file].append({
                 "pitcher_name": "投手", "uniform_number": "", "innings_pitched": 3.0,
                 "pitch_count": 50, "hits_allowed": 0, "strikeouts": 0, "walks_allowed": 0,
                 "hit_by_pitch": 0, "runs_allowed": 0, "earned_runs": 0, "decision": "なし"
             })
             st.rerun()
+
+        st.caption("タブを指で横にスワイプして投手を選択し、修正後は「保存」を押してください。")
 
         pt_tabs = st.tabs([f"#{p.get('uniform_number','')} {p.get('pitcher_name','投手')}" for p in cur_pitchers])
         for idx, (tab, pt) in enumerate(zip(pt_tabs, cur_pitchers)):
