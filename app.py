@@ -65,21 +65,25 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a {
     position: relative !important;
 }
 
-/* 2. 元の「app」という文字だけを透明化（領域はそのまま維持） */
-section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a span {
+/* 2. 最上段の「app」の文字・要素を、PCの白文字指定に勝つ強度で100%完全透明化 */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a *,
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child span,
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child p {
     color: transparent !important;
+    opacity: 0 !important;
 }
 
-/* 3. その枠の上に「🏠 ホーム」の文字を重ねて表示 */
+/* 3. 「🏠 ホーム」を下のメニューと揃う位置に重ねて表示 */
 section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a::after {
     content: "🏠 ホーム" !important;
     position: absolute !important;
-    left: 1rem !important;
+    left: 0.75rem !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     font-size: 0.95rem !important;
     font-weight: bold !important;
     color: #ffffff !important;
+    opacity: 1 !important;
     pointer-events: none !important;
     white-space: nowrap !important;
 }
