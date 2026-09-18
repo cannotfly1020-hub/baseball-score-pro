@@ -292,9 +292,15 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         white-space: nowrap !important;
     }
 
-   /* 右端の下矢印アイコン（SVG）を非表示にして、枠の横幅をすべて文字表示に使う */
-    div[data-testid="stForm"] div[data-baseweb="select"] svg {
+   /* 右端の下矢印エリア（ラッパーコンテナごと）を完全に消去 */
+    div[data-testid="stForm"] div[data-baseweb="select"] [aria-hidden="true"] {
         display: none !important;
+    }
+    div[data-testid="stForm"] div[data-baseweb="select"] svg,
+    div[data-testid="stForm"] div[data-baseweb="select"] span[data-baseweb="icon"] {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
     }
     }
 
