@@ -521,7 +521,7 @@ if st.session_state.all_matches_data:
             st.session_state.all_matches_data[selected_match_file].append(new_player_template)
             st.rerun()
 
-    col_img, col_grid = st.columns([1.1, 1.3])
+    col_img, col_grid = st.columns([1, 1.5])
 
     with col_img:
         st.markdown(f"#### 📷 原本画像: `{selected_match_file}`")
