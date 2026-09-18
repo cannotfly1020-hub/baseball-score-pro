@@ -292,12 +292,10 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         white-space: nowrap !important;
     }
 
-    /* 右端の下矢印アイコン（SVG）の専有幅を最小化 */
+   /* 右端の下矢印アイコン（SVG）を非表示にして、枠の横幅をすべて文字表示に使う */
     div[data-testid="stForm"] div[data-baseweb="select"] svg {
-        width: 12px !important;
-        height: 12px !important;
-        margin-left: 0px !important;
-        margin-right: 0px !important;
+        display: none !important;
+    }
     }
 
     /* ---------------------------------------------------
