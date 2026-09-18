@@ -251,7 +251,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         font-weight: 500 !important;
     }
 
-    /* 画面背景側の一般テキスト（カード外）のコントラスト強化 */
+    /* 画面背景側の一般テキスト（カード外のみ適用） */
     .stApp > div p, .stApp > div span {
         color: #f0f4f1 !important;
     }
@@ -262,7 +262,34 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         border-color: #2d5a45 !important;
     }
 
-    /* サイドバー全体の背景・枠・文字色 */
+    /* ---------------------------------------------------
+       PCカード内の文字色を強制的に黒へ固定（白飛び解消）
+       --------------------------------------------------- */
+    div[data-testid="stForm"] h5,
+    div[data-testid="stForm"] h5 *,
+    div[data-testid="stForm"] p,
+    div[data-testid="stForm"] p *,
+    div[data-testid="stForm"] span,
+    div[data-testid="stForm"] strong {
+        color: #111111 !important;
+    }
+
+    /* ---------------------------------------------------
+       PCプルダウンの余白圧縮（「三振」「なし」が全文字収まるように調整）
+       --------------------------------------------------- */
+    div[data-testid="stForm"] div[data-baseweb="select"] > div {
+        padding-left: 4px !important;
+        padding-right: 2px !important;
+    }
+    div[data-testid="stForm"] div[data-baseweb="select"] * {
+        font-size: 0.78rem !important; /* 文字サイズを適正化して全文表示 */
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+    /* ---------------------------------------------------
+       サイドバー全体の背景・枠・文字色
+       --------------------------------------------------- */
     section[data-testid="stSidebar"] {
         width: 180px !important;
         min-width: 180px !important;
