@@ -275,16 +275,29 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
     }
 
     /* ---------------------------------------------------
-       PCプルダウンの余白圧縮（「三振」「なし」が全文字収まるように調整）
+       PCプルダウンの余白圧縮＆矢印サイズ最適化
        --------------------------------------------------- */
+    /* セレクトボックス内部全体の左右余白を限界までカット */
     div[data-testid="stForm"] div[data-baseweb="select"] > div {
-        padding-left: 4px !important;
+        padding-left: 2px !important;
         padding-right: 2px !important;
     }
-    div[data-testid="stForm"] div[data-baseweb="select"] * {
-        font-size: 0.78rem !important; /* 文字サイズを適正化して全文表示 */
-        padding-left: 0px !important;
-        padding-right: 0px !important;
+
+    /* 文字コンテナ：はみ出しを防止し適正サイズで全文表示 */
+    div[data-testid="stForm"] div[data-baseweb="select"] div[aria-hidden="true"],
+    div[data-testid="stForm"] div[data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
+    div[data-testid="stForm"] div[data-baseweb="select"] span {
+        font-size: 0.72rem !important;
+        letter-spacing: -0.5px !important;
+        white-space: nowrap !important;
+    }
+
+    /* 右端の下矢印アイコン（SVG）の専有幅を最小化 */
+    div[data-testid="stForm"] div[data-baseweb="select"] svg {
+        width: 12px !important;
+        height: 12px !important;
+        margin-left: 0px !important;
+        margin-right: 0px !important;
     }
 
     /* ---------------------------------------------------
