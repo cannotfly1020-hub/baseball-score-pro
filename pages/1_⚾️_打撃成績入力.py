@@ -1,26 +1,18 @@
 import io
-import json
-import base64
-from datetime import datetime
+import os
 import pandas as pd
-from google import genai
-from google.genai import types
+import openpyxl
 import streamlit as st
-import streamlit.components.v1 as components
-from PIL import Image
-
-# 独立させたモジュールから読み込み
-from prompts.batting_prompts import ROSTER_PROMPT, DETAILS_PROMPT
-from utils.batting_utils import enhance_sharpness, calculate_stats_from_grid, create_excel_from_compiled, RESULT_OPTIONS
 
 st.set_page_config(
-    page_title="打撃成績解析＆エディタ",
-    page_icon="⚾️",
+    page_title="データ統合・チーム通算集計",
+    page_icon="📊",
     layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # ----------------------------------------------------
-# チームカラー UIデザイン（ホーム画面と完全統一）
+# チームカラー UIデザイン（打撃成績入力画面と完全統一）
 # ----------------------------------------------------
 st.markdown("""
 <style>
@@ -38,145 +30,28 @@ st.markdown("""
     padding-right: 0.8rem !important;
 }
 
-/* 3. タブバー外枠：金色アンダーライン */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    padding: 8px 4px 10px 4px !important;
-    background-color: transparent !important;
-    border-bottom: 2.5px solid #d4af37 !important;
-    -webkit-overflow-scrolling: touch;
-    margin-bottom: 1rem !important;
-}
-
-/* 4. 非選択タブ */
-.stTabs [data-baseweb="tab"] {
-    height: auto !important;
-    min-height: 40px !important;
-    padding: 8px 14px !important;
-    border-radius: 8px 8px 0 0 !important;
-    background-color: #1b382b !important;
-    color: #c2d6cb !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    border: 1px solid #2d5a45 !important;
-    border-bottom: none !important;
-    display: inline-flex !important;
-    align-items: center !important;
-}
-
-/* 5. 選択中タブ：ユニフォーム赤 ＋ 金色枠 */
-.stTabs [aria-selected="true"] {
-    background-color: #991b1b !important;
-    color: #ffffff !important;
-    border-top: 2.5px solid #d4af37 !important;
-    border-left: 2px solid #d4af37 !important;
-    border-right: 2px solid #d4af37 !important;
-    border-bottom: none !important;
-    font-weight: bold !important;
-}
-
-/* 6. 見出し・タイトルの装飾 */
+/* 3. 見出し・タイトルの装飾 */
 h1, h2, h3, h4 {
     color: #ffffff !important;
 }
 
-/* 7. ファイルアップローダー */
+/* 4. ファイルアップローダー（金枠ダッシュ・ダークグリーン背景） */
 [data-testid="stFileUploader"] {
     background-color: #172d22 !important;
-    border: 1px dashed #d4af37 !important;
+    border: 1.5px dashed #d4af37 !important;
     border-radius: 10px !important;
-    padding: 10px !important;
+    padding: 12px !important;
 }
-
-/* 8. 選手カード枠：スコア用紙白 ＋ 赤金ストライプ枠 */
-div[data-testid="stForm"] {
-    background-color: #ffffff !important;
-    border: 1px solid #dcd6cd !important;
-    border-left: 6px solid #991b1b !important;
-    border-radius: 8px !important;
-    padding: 16px 14px !important;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important;
-}
-
-/* カード内の見出し・全ラベルを真っ黒＆くっきり太字に強制 */
-div[data-testid="stForm"] h5,
-div[data-testid="stForm"] label,
-div[data-testid="stForm"] label p,
-div[data-testid="stForm"] span,
-div[data-testid="stForm"] p {
-    color: #111111 !important;
-    font-weight: 700 !important;
-    font-size: 0.92rem !important;
-}
-
-/* 9. 入力欄（テキスト・数値）：白背景・黒文字・見やすいグレー枠 */
-div[data-testid="stForm"] input[type="text"],
-div[data-testid="stForm"] input[type="number"] {
-    background-color: #f8faf9 !important;
-    color: #111111 !important;
-    font-weight: bold !important;
-    border: 1.5px solid #b0bec5 !important;
-    border-radius: 6px !important;
-}
-
-/* 数値入力（打点・盗塁）の「＋」「−」ステップボタンを上品なグレーに */
-div[data-testid="stForm"] [data-testid="stNumberInput"] button {
-    background-color: #e2e8f0 !important;
-    border: 1px solid #cbd5e1 !important;
-    color: #1e293b !important;
-    box-shadow: none !important;
-}
-div[data-testid="stForm"] [data-testid="stNumberInput"] button * {
-    color: #1e293b !important;
-    fill: #1e293b !important;
-}
-
-/* 10. 【最重要】各回の打席プルダウン（赤潰れを解消し、白地・くっきり黒文字へ） */
-div[data-testid="stForm"] div[data-baseweb="select"],
-div[data-testid="stForm"] div[data-baseweb="select"] > div {
-    background-color: #ffffff !important;
-    border: 1.5px solid #2d5a45 !important;
-    border-radius: 6px !important;
-    min-height: 38px !important;
-}
-div[data-testid="stForm"] div[data-baseweb="select"] * {
-    color: #111111 !important;
+[data-testid="stFileUploader"] label p,
+[data-testid="stFileUploader"] span {
+    color: #f0f4f1 !important;
     font-weight: bold !important;
 }
-div[data-testid="stForm"] div[data-baseweb="select"] svg {
-    fill: #2d5a45 !important;
-}
-/* スマホでのキーボード立ち上がり防止 */
-div[data-baseweb="select"] input {
-    pointer-events: none !important;
-    caret-color: transparent !important;
-    user-select: none !important;
-}
 
-/* 11. イニング枠ヘッダー（◇ ダイヤモンド） */
-.inning-header {
-    text-align: center;
-    background-color: #1b382b !important;
-    color: #ffffff !important;
-    font-weight: bold;
-    font-size: 0.85rem;
-    padding: 5px 0;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    border-bottom: 2.5px solid #d4af37;
-}
-.diamond-icon {
-    color: #ffd700 !important;
-    margin-right: 3px;
-    font-size: 0.9rem;
-}
-
-/* 12. アクションボタン（変更を保存・AI解析・Excel作成）のみクリムゾンレッド ＋ 金枠 */
-div[data-testid="stForm"] button[kind="secondaryFormSubmit"],
+/* 5. アクションボタン・ダウンロードボタン（クリムゾンレッド ＋ 金枠 ＋ 白文字） */
 button[data-testid="stBaseButton-primary"],
-button[data-testid="stBaseButton-secondary"] {
+button[data-testid="stBaseButton-secondary"],
+.stDownloadButton button {
     background-color: #991b1b !important;
     color: #ffffff !important;
     border: 2px solid #d4af37 !important;
@@ -185,24 +60,41 @@ button[data-testid="stBaseButton-secondary"] {
     font-size: 0.95rem !important;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
 }
-div[data-testid="stForm"] button[kind="secondaryFormSubmit"] *,
 button[data-testid="stBaseButton-primary"] *,
-button[data-testid="stBaseButton-secondary"] * {
+button[data-testid="stBaseButton-secondary"] *,
+.stDownloadButton button * {
     color: #ffffff !important;
 }
 
-/* 13. 固定画像ビューワー */
-.sticky-mobile-viewer {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 3.5rem;
-    z-index: 99;
-    background-color: rgba(15, 31, 23, 0.95);
-    padding: 8px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-    border: 1px solid #d4af37;
-    margin-bottom: 12px;
+/* 6. サマリーメトリクスカード（スコア用紙白 ＋ 赤金ストライプ枠） */
+.metric-card {
+    background-color: #ffffff !important;
+    border: 1px solid #dcd6cd !important;
+    border-left: 6px solid #991b1b !important;
+    border-radius: 8px !important;
+    padding: 12px 14px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+.metric-card h4 {
+    color: #111111 !important;
+    margin: 0 0 4px 0 !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+}
+.metric-card p {
+    color: #991b1b !important;
+    margin: 0 !important;
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+}
+
+/* 7. データフレーム（表）の背景と境界線 */
+[data-testid="stDataFrame"] {
+    background-color: #112217 !important;
+    border: 1px solid #2d5a45 !important;
+    border-radius: 8px !important;
+    padding: 6px !important;
 }
 
 /* ===================================================
@@ -252,7 +144,6 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         font-weight: 500 !important;
     }
 
-    /* 画面背景側の一般テキスト（カード外のみ適用） */
     .stApp > div p, .stApp > div span {
         color: #f0f4f1 !important;
     }
@@ -261,48 +152,6 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         margin-top: 1.5rem !important;
         margin-bottom: 1.5rem !important;
         border-color: #2d5a45 !important;
-    }
-
-    /* ---------------------------------------------------
-       PCカード内の文字色を強制的に黒へ固定（白飛び解消）
-       --------------------------------------------------- */
-    div[data-testid="stForm"] h5,
-    div[data-testid="stForm"] h5 *,
-    div[data-testid="stForm"] p,
-    div[data-testid="stForm"] p *,
-    div[data-testid="stForm"] span,
-    div[data-testid="stForm"] strong {
-        color: #111111 !important;
-    }
-
-    /* ---------------------------------------------------
-       PCプルダウンの余白圧縮＆矢印サイズ最適化
-       --------------------------------------------------- */
-    /* セレクトボックス内部全体の左右余白を限界までカット */
-    div[data-testid="stForm"] div[data-baseweb="select"] > div {
-        padding-left: 2px !important;
-        padding-right: 2px !important;
-    }
-
-    /* 文字コンテナ：はみ出しを防止し適正サイズで全文表示 */
-    div[data-testid="stForm"] div[data-baseweb="select"] div[aria-hidden="true"],
-    div[data-testid="stForm"] div[data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
-    div[data-testid="stForm"] div[data-baseweb="select"] span {
-        font-size: 0.68rem !important;
-        letter-spacing: -0.5px !important;
-        white-space: nowrap !important;
-    }
-
-   /* 右端の下矢印エリア（ラッパーコンテナごと）を完全に消去 */
-    div[data-testid="stForm"] div[data-baseweb="select"] [aria-hidden="true"] {
-        display: none !important;
-    }
-    div[data-testid="stForm"] div[data-baseweb="select"] svg,
-    div[data-testid="stForm"] div[data-baseweb="select"] span[data-baseweb="icon"] {
-        display: none !important;
-        width: 0 !important;
-        height: 0 !important;
-    }
     }
 
     /* ---------------------------------------------------
@@ -363,360 +212,146 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
 </style>
 """, unsafe_allow_html=True)
 
-# セッション状態の初期化
-if "all_matches_data" not in st.session_state:
-    st.session_state.all_matches_data = {}
-if "match_images_b64" not in st.session_state:
-    st.session_state.match_images_b64 = {}
+st.subheader("📊 データ統合・チーム通算集計")
+st.caption("保存された試合ごとのExcelファイル（.xlsx）を取り込み、選手ごとに名寄せして通算打撃成績を集計します。")
 
-# APIキー設定
-api_key = st.secrets.get("GEMINI_API_KEY")
-if not api_key:
-    api_key = st.sidebar.text_input("管理者APIキー (Gemini)", type="password")
-
-client = genai.Client(api_key=api_key) if api_key else None
-
-st.subheader("⚾️ スコア照合・打席盤面エディタ")
-st.caption("高精細カラー解析により、手書き文字および赤ペン結線を走査・判定します。")
-
-# ----------------------------------------------------
-# バックアップ読み込み（打撃アプリの完全復元ロジック）
-# ----------------------------------------------------
-with st.expander("📂 前回の作業バックアップ（JSON）を読み込んで再開する", expanded=False):
-    backup_file = st.file_uploader(
-        "保存したバックアップJSONファイルを選択",
-        type=["json"],
-        key="backup_uploader_direct"
-    )
-    if backup_file is not None:
-        if st.button("このバックアップから作業を完全復元する", type="secondary", use_container_width=True):
-            try:
-                loaded_data = json.loads(backup_file.getvalue().decode("utf-8"))
-                if "all_matches_data" in loaded_data:
-                    st.session_state.all_matches_data = loaded_data["all_matches_data"]
-                    st.session_state.match_images_b64 = loaded_data.get("match_images_b64", {})
-                    st.success(f"🎉 全 {len(st.session_state.all_matches_data)} 試合分の編集データを完全に復元しました！")
-                    st.rerun()
-                else:
-                    st.error("バックアップファイルの形式が正しくありません。")
-            except Exception as e:
-                st.error(f"バックアップ復元エラー: {e}")
-
-st.divider()
-
-if not client:
-    st.warning("Gemini APIキーを設定してください（Secrets または サイドバー）。")
-    st.stop()
+def is_valid_game_sheet(sheet_name: str) -> bool:
+    """
+    試合ごとの個別打撃記録シートのみを集計対象とする判定。
+    「通算」「集計」「選手別」「個人」などのまとめシートを自動検知して除外し、二重カウントを防ぐ。
+    """
+    exclude_keywords = ["通算", "集計", "まとめ", "個人", "選手別", "テンプレート", "設定", "マスタ"]
+    for kw in exclude_keywords:
+        if kw in sheet_name:
+            return False
+    return True
 
 uploaded_files = st.file_uploader(
-    "新規スコアブック写真を選択（複数ファイル選択可）",
-    type=["jpg", "jpeg", "png"],
+    "試合記録Excelファイル（.xlsx）を選択してください（複数ファイル選択可）",
+    type=["xlsx"],
     accept_multiple_files=True
 )
 
+all_records = []
+
 if uploaded_files:
-    if st.button(f"AIで全{len(uploaded_files)}試合を高精度一括解析する", type="primary"):
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        
-        new_all_matches = {}
-        new_images_b64 = {}
+    for uploaded_file in uploaded_files:
+        try:
+            excel_data = pd.ExcelFile(uploaded_file)
+            for sheet in excel_data.sheet_names:
+                # 重複防止判定：まとめシートや選手別シートはスキップ
+                if not is_valid_game_sheet(sheet):
+                    continue
 
-        for idx, f in enumerate(uploaded_files):
-            f_name = f.name
-            status_text.text(f"【{idx+1}/{len(uploaded_files)}】{f_name} の高解像度鮮鋭化＆選手名簿を確定中...")
-            raw_bytes = f.read()
-            new_images_b64[f_name] = base64.b64encode(raw_bytes).decode()
-            
-            pil_img = Image.open(io.BytesIO(raw_bytes))
-            highres_bytes = enhance_sharpness(pil_img)
+                df_sheet = pd.read_excel(excel_data, sheet_name=sheet)
 
-            try:
-                # Step 1: 選手名簿の確定
-                res_roster = client.models.generate_content(
-                    model="gemini-3.6-flash",
-                    contents=[
-                        types.Part.from_bytes(data=highres_bytes, mime_type="image/jpeg"),
-                        "スコアブック左側の打順・背番号・選手名（先発・交代・代打二段書き含む）を漏れなく抽出してください。"
-                    ],
-                    config=types.GenerateContentConfig(
-                        system_instruction=ROSTER_PROMPT,
-                        response_mime_type="application/json",
-                        temperature=0.1
-                    )
-                )
-                roster_data = res_roster.text
+                # 必須カラム「選手名」が存在しないシートはスキップ
+                if "選手名" not in df_sheet.columns:
+                    continue
 
-                # Step 2: 打席判定
-                status_text.text(f"【{idx+1}/{len(uploaded_files)}】{f_name} の全イニング打席を精査中...")
-                res_details = client.models.generate_content(
-                    model="gemini-3.6-flash",
-                    contents=[
-                        types.Part.from_bytes(data=highres_bytes, mime_type="image/jpeg"),
-                        f"確定選手名簿:\n{roster_data}\n\n上記選手枠に基づき、スコアブックの1回〜7回の全打席詳細、打点、盗塁を判定してください。"
-                    ],
-                    config=types.GenerateContentConfig(
-                        system_instruction=DETAILS_PROMPT,
-                        response_mime_type="application/json",
-                        temperature=0.1
-                    )
-                )
-                parsed = json.loads(res_details.text)
-                new_all_matches[f_name] = parsed
+                # 欠損行・合計行・チーム行の除外
+                df_sheet = df_sheet.dropna(subset=["選手名"])
+                df_sheet = df_sheet[~df_sheet["選手名"].astype(str).str.contains("合計|チーム|計", na=False)]
 
-            except Exception as e:
-                st.error(f"{f_name} の解析エラー: {e}")
+                # 出典シート情報の保持
+                df_sheet["試合・シート名"] = f"{uploaded_file.name} - {sheet}"
+                all_records.append(df_sheet)
 
-            progress_bar.progress((idx + 1) / len(uploaded_files))
+        except Exception as e:
+            st.error(f"ファイル読み込みエラー ({uploaded_file.name}): {e}")
 
-        status_text.empty()
-        if new_all_matches:
-            st.session_state.all_matches_data = new_all_matches
-            st.session_state.match_images_b64 = new_images_b64
-            st.success(f"🎉 全 {len(new_all_matches)} 試合分の解析が完了しました！")
+if all_records:
+    raw_df = pd.concat(all_records, ignore_index=True)
 
-# ----------------------------------------------------
-# データが存在する場合の編集エディタ & バックアップ保存
-# ----------------------------------------------------
-if st.session_state.all_matches_data:
+    # 選手名の前後の空白・全角スペースを除去し、同一人物の名寄せ精度を担保
+    raw_df["選手名"] = raw_df["選手名"].astype(str).str.strip().str.replace("　", " ")
+
+    # 数値カラムの安全な数値変換（欠損値は0で補正）
+    stat_cols = ["打数", "安打", "単打", "二塁打", "三塁打", "本塁打", "打点", "得点", "四球", "死球", "三振", "犠打", "犠飛", "盗塁", "失策"]
+    for col in stat_cols:
+        if col in raw_df.columns:
+            raw_df[col] = pd.to_numeric(raw_df[col], errors="coerce").fillna(0).astype(int)
+        else:
+            raw_df[col] = 0
+
+    st.success(f"🎉 計 {len(uploaded_files)} ファイルから {len(raw_df)} 件の打撃レコードを統合しました（まとめシートの重複を自動除外済）。")
+
+    # 各選手の最新の背番号を取得（最後の行の記録を採用）
+    latest_numbers = raw_df.groupby("選手名")["背番号"].last().fillna("-").astype(str)
+
+    # 選手名を主キーとして合算集計（1人1行）
+    agg_dict = {col: "sum" for col in stat_cols}
+    agg_dict["試合・シート名"] = "count"
+
+    summary_df = raw_df.groupby("選手名", as_index=False).agg(agg_dict)
+    summary_df.rename(columns={"試合・シート名": "出場機会数"}, inplace=True)
+
+    # 代表背番号を結合
+    summary_df["背番号"] = summary_df["選手名"].map(latest_numbers)
+
+    # 打席数 = 打数 + 四球 + 死球 + 犠打 + 犠飛
+    summary_df["打席数"] = summary_df["打数"] + summary_df["四球"] + summary_df["死球"] + summary_df["犠打"] + summary_df["犠飛"]
+
+    # 打率 = 安打 / 打数
+    summary_df["打率"] = summary_df.apply(
+        lambda r: f"{r['安打'] / r['打数']:.3f}" if r["打数"] > 0 else ".000", axis=1
+    )
+
+    # 出塁率 = (安打 + 四球 + 死球) / (打数 + 四球 + 死球 + 犠飛)
+    summary_df["出塁率"] = summary_df.apply(
+        lambda r: f"{(r['安打'] + r['四球'] + r['死球']) / (r['打数'] + r['四球'] + r['死球'] + r['犠飛']):.3f}"
+        if (r["打数"] + r["四球"] + r["死球"] + r["犠飛"]) > 0 else ".000", axis=1
+    )
+
+    # 長打率 = (単打 + 二塁打*2 + 三塁打*3 + 本塁打*4) / 打数
+    summary_df["長打率"] = summary_df.apply(
+        lambda r: f"{(r['単打'] + r['二塁打']*2 + r['三塁打']*3 + r['本塁打']*4) / r['打数']:.3f}"
+        if r["打数"] > 0 else ".000", axis=1
+    )
+
+    # OPS = 出塁率 + 長打率
+    summary_df["OPS"] = summary_df.apply(
+        lambda r: f"{float(r['出塁率']) + float(r['長打率']):.3f}", axis=1
+    )
+
+    # カラムの並び順整理（背番号・選手名を先頭へ配置）
+    display_cols = [
+        "背番号", "選手名", "打率", "出場機会数",
+        "打席数", "打数", "安打", "二塁打", "三塁打", "本塁打",
+        "打点", "得点", "四球", "死球", "三振", "犠打", "犠飛", "盗塁", "出塁率", "長打率", "OPS"
+    ]
+    display_cols = [c for c in display_cols if c in summary_df.columns]
+    summary_df = summary_df[display_cols].sort_values(by=["安打", "打率"], ascending=False).reset_index(drop=True)
+
+    # サマリーメトリクスカード表示（白地・赤太文字のカードデザイン）
+    m1, m2, m3, m4 = st.columns(4)
+    with m1:
+        st.markdown(f'<div class="metric-card"><h4>登録選手数</h4><p>{len(summary_df)} 名</p></div>', unsafe_allow_html=True)
+    with m2:
+        total_hits = summary_df["安打"].sum()
+        st.markdown(f'<div class="metric-card"><h4>チーム総安打数</h4><p>{total_hits} 本</p></div>', unsafe_allow_html=True)
+    with m3:
+        total_rbi = summary_df["打点"].sum()
+        st.markdown(f'<div class="metric-card"><h4>チーム総打点</h4><p>{total_rbi} 点</p></div>', unsafe_allow_html=True)
+    with m4:
+        total_hr = summary_df["本塁打"].sum()
+        st.markdown(f'<div class="metric-card"><h4>総本塁打数</h4><p>{total_hr} 本</p></div>', unsafe_allow_html=True)
+
+    st.markdown("#### 📋 選手別通算打撃成績一覧（1人1行 名寄せ集計済）")
+    st.dataframe(summary_df, use_container_width=True, hide_index=True)
+
     st.divider()
-
-    # バックアップダウンロード
-    current_backup_payload = {
-        "all_matches_data": st.session_state.all_matches_data,
-        "match_images_b64": st.session_state.match_images_b64,
-        "saved_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
-    json_string = json.dumps(current_backup_payload, ensure_ascii=False, indent=2)
-
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        summary_df.to_excel(writer, index=False, sheet_name="通算打撃成績")
+    
     st.download_button(
-        label="💾 現在の作業状態をバックアップ保存 (JSONダウンロード)",
-        data=json_string,
-        file_name=f"学童野球スコア_途中作業データ_{datetime.now().strftime('%Y%m%d_%H%M')}.json",
-        mime="application/json",
+        label="📥 チーム通算打撃成績Excelをダウンロード (.xlsx)",
+        data=buffer.getvalue(),
+        file_name="チーム通算打撃成績_名寄せ集計済.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True
     )
 
-    match_files = list(st.session_state.all_matches_data.keys())
-    
-    top_c1, top_c2 = st.columns([2, 1])
-    selected_match_file = top_c1.selectbox("📁 確認・編集する試合を選択", match_files)
-    is_mobile_sticky = top_c2.checkbox("📱 スマホ表示（画像を上部に固定）", value=False)
-
-    current_players = st.session_state.all_matches_data.get(selected_match_file, [])
-    current_b64 = st.session_state.match_images_b64.get(selected_match_file, "")
-
-    add_col1, add_col2 = st.columns([1, 3])
-    with add_col1:
-        if st.button("➕ この試合に選手を手動追加"):
-            new_player_template = {
-                "batting_order": len(current_players) + 1,
-                "uniform_number": "",
-                "player_name": f"追加選手{len(current_players) + 1}",
-                "is_substitute": True,
-                "rbi": 0,
-                "stolen_bases": 0,
-                "innings": {"1": "なし", "2": "なし", "3": "なし", "4": "なし", "5": "なし", "6": "なし", "7": "なし"},
-                "highlight": ""
-            }
-            st.session_state.all_matches_data[selected_match_file].append(new_player_template)
-            st.rerun()
-
-    col_img, col_grid = st.columns([0.9, 1.6])
-
-    with col_img:
-        st.markdown(f"#### 📷 原本画像: `{selected_match_file}`")
-        zoom_val = st.slider("🔍 拡大率", min_value=100, max_value=350, value=150, step=25, format="%d%%")
-        
-        box_height = 320 if is_mobile_sticky else 500
-        sticky_class = "sticky-mobile-viewer" if is_mobile_sticky else ""
-
-        viewer_html = f"""
-        <div id="drag-viewer" class="{sticky_class}" style="
-            width: 100%; 
-            height: {box_height}px; 
-            overflow: auto; 
-            border: 2px solid #d4af37; 
-            border-radius: 8px; 
-            background-color: #111; 
-            cursor: grab; 
-            user-select: none;
-            -webkit-user-select: none;
-        ">
-            <img id="score-img" src="data:image/jpeg;base64,{current_b64}" style="
-                width: {zoom_val}%; 
-                max-width: none; 
-                display: block; 
-                margin: 0 auto; 
-                pointer-events: none;
-            " />
-        </div>
-
-        <script>
-            const ele = document.getElementById('drag-viewer');
-            let pos = {{ top: 0, left: 0, x: 0, y: 0 }};
-
-            const mouseDownHandler = function (e) {{
-                ele.style.cursor = 'grabbing';
-                pos = {{
-                    left: ele.scrollLeft,
-                    top: ele.scrollTop,
-                    x: e.clientX,
-                    y: e.clientY,
-                }};
-                document.addEventListener('mousemove', mouseMoveHandler);
-                document.addEventListener('mouseup', mouseUpHandler);
-            }};
-
-            const mouseMoveHandler = function (e) {{
-                const dx = e.clientX - pos.x;
-                const dy = e.clientY - pos.y;
-                ele.scrollTop = pos.top - dy;
-                ele.scrollLeft = pos.left - dx;
-            }};
-
-            const mouseUpHandler = function () {{
-                ele.style.cursor = 'grab';
-                document.removeEventListener('mousemove', mouseMoveHandler);
-                document.removeEventListener('mouseup', mouseUpHandler);
-            }};
-
-            ele.addEventListener('mousedown', mouseDownHandler);
-        </script>
-        """
-        components.html(viewer_html, height=box_height + 25)
-
-    with col_grid:
-        st.markdown("#### 🎯 打席盤面エディタ")
-        st.caption("タブを指で横にスワイプして選手を選択し、修正後は「保存」を押してください。")
-
-        tab_labels = []
-        for idx, player in enumerate(current_players):
-            u_num = str(player.get("uniform_number", "")).strip()
-            num_str = f"#{u_num} " if u_num else ""
-            p_name = str(player.get("player_name", "選手")).strip()
-            sub_tag = "(代)" if player.get("is_substitute") else ""
-            tab_labels.append(f"{num_str}{p_name}{sub_tag}")
-
-        player_tabs = st.tabs(tab_labels)
-
-        for idx, (p_tab, player) in enumerate(zip(player_tabs, current_players)):
-            with p_tab:
-                is_sub = player.get("is_substitute", False)
-                order_val = player.get("batting_order", idx + 1)
-                u_num_init = str(player.get("uniform_number", "")).strip()
-                p_name_init = str(player.get("player_name", "")).strip()
-
-                with st.form(key=f"form_player_{selected_match_file}_{idx}"):
-                    st.markdown(f"##### **【{order_val}番】 #{u_num_init or '-'} {p_name_init} {'（途中交代・代打）' if is_sub else '（先発）'}**")
-
-                    p_cols = st.columns([1, 2, 3])
-                    u_num = p_cols[0].text_input("背番号", value=u_num_init, key=f"{selected_match_file}_num_{idx}")
-                    p_name = p_cols[1].text_input("選手名（漢字）", value=p_name_init, key=f"{selected_match_file}_name_{idx}")
-                    hl = p_cols[2].text_input("ハイライトメモ", value=str(player.get("highlight", "")), key=f"{selected_match_file}_hl_{idx}")
-
-                    stat_c1, stat_c2 = st.columns(2)
-                    rbi_val = stat_c1.number_input("打点 (RBI)", min_value=0, max_value=20, value=int(player.get("rbi", 0)), step=1, key=f"{selected_match_file}_rbi_{idx}")
-                    sb_val = stat_c2.number_input("盗塁数 (SB)", min_value=0, max_value=20, value=int(player.get("stolen_bases", 0)), step=1, key=f"{selected_match_file}_sb_{idx}")
-
-                    st.markdown("**各回の打席結果（◇ダイヤモンド）**")
-                    inn_cols = st.columns(7)
-                    new_innings = {}
-                    for i_idx, inn_str in enumerate(["1", "2", "3", "4", "5", "6", "7"]):
-                        with inn_cols[i_idx]:
-                            st.markdown(f"<div class='inning-header'><span class='diamond-icon'>◇</span>{inn_str}回</div>", unsafe_allow_html=True)
-                            cur_val = player.get("innings", {}).get(inn_str, "なし")
-                            default_idx = RESULT_OPTIONS.index(cur_val) if cur_val in RESULT_OPTIONS else 0
-                            sel = st.selectbox(
-                                f"{inn_str}回",
-                                RESULT_OPTIONS,
-                                index=default_idx,
-                                key=f"{selected_match_file}_inn_{idx}_{inn_str}",
-                                label_visibility="collapsed"
-                            )
-                            new_innings[inn_str] = sel
-
-                    st.write("")
-                    submitted = st.form_submit_button("💾 この選手の変更を保存", use_container_width=True)
-                    if submitted:
-                        st.session_state.all_matches_data[selected_match_file][idx] = {
-                            "match_date": player.get("match_date", "-"),
-                            "opponent": player.get("opponent", "-"),
-                            "batting_order": order_val,
-                            "uniform_number": u_num,
-                            "player_name": p_name,
-                            "is_substitute": is_sub,
-                            "rbi": rbi_val,
-                            "stolen_bases": sb_val,
-                            "innings": new_innings,
-                            "highlight": hl
-                        }
-                        st.success(f"{p_name} 選手のデータを保存しました！")
-                        st.rerun()
-
-                # 誤って追加した選手枠の削除ボタン
-                if st.button(f"🗑️ この選手枠（{p_name_init or '追加選手'}）を削除", key=f"del_btn_{selected_match_file}_{idx}"):
-                    st.session_state.all_matches_data[selected_match_file].pop(idx)
-                    st.warning(f"{p_name_init or '選手'} を削除しました。")
-                    st.rerun()
-
-        st.write("")
-        if st.button("📊 全試合の成績を統合確定・Excelを作成する", type="primary", use_container_width=True):
-            all_compiled = []
-            for m_file, p_list in st.session_state.all_matches_data.items():
-                compiled_single = calculate_stats_from_grid(p_list, match_file_name=m_file)
-                all_compiled.extend(compiled_single)
-
-            st.session_state["compiled_records"] = all_compiled
-            st.success(f"🎉 全 {len(st.session_state.all_matches_data)} 試合分の成績を確定統合しました！")
-
-  # ----------------------------------------------------
-    # 日本語列名 Excel生成 & ダウンロード
-    # ----------------------------------------------------
-    if "compiled_records" in st.session_state:
-        st.divider()
-
-        column_mapping = {
-            'source_file': '試合名',
-            'batting_order': '打順',
-            'uniform_number': '背番号',
-            'player_name': '選手名',
-            'is_substitute': '途中出場',
-            'plate_appearances': '打席数',
-            'at_bats': '打数',
-            'hits': '安打',
-            'doubles': '二塁打',
-            'triples': '三塁打',
-            'homeruns': '本塁打',
-            'walks': '四球',
-            'deadballs': '死球',
-            'strikeouts': '三振',
-            'sacrifice_hits': '犠打',
-            'sacrifice_flies': '犠飛',
-            'rbi': '打点',
-            'stolen_bases': '盗塁',
-            'highlight': '寸評・ハイライト'
-        }
-
-        excel_buffer = io.BytesIO()
-        df_all = pd.DataFrame(st.session_state["compiled_records"])
-
-        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-            df_jp = df_all.rename(columns=column_mapping)
-            df_jp.to_excel(writer, sheet_name='全打席成績一覧', index=False)
-
-            if not df_all.empty and 'player_name' in df_all.columns:
-                for player_val, p_df in df_all.groupby('player_name'):
-                    sheet_name_clean = str(player_val).strip()[:30]
-                    p_df_jp = p_df.rename(columns=column_mapping)
-                    p_df_jp.to_excel(writer, sheet_name=sheet_name_clean, index=False)
-
-        excel_data = excel_buffer.getvalue()
-
-        st.download_button(
-            label=f"📥 全{len(st.session_state.all_matches_data)}試合分 選手名別シート付きExcelをダウンロード",
-            data=excel_data,
-            file_name="チーム通算打撃成績一覧.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
+else:
+    st.info("集計対象のExcelファイルをドラッグ＆ドロップしてください。重複シート（通算・選手別等）を自動除外し、選手名で統合集計します。")
