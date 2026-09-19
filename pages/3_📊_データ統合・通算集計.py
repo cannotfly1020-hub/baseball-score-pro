@@ -323,19 +323,12 @@ if all_records:
     display_cols = [c for c in display_cols if c in summary_df.columns]
     summary_df = summary_df[display_cols].sort_values(by=["安打", "打率"], ascending=False).reset_index(drop=True)
 
-    # サマリーメトリクスカード表示（文字色を直接指定して白飛びを100%防止）
+    # サマリーメトリクス表示（Streamlit標準機能で100%確実に文字を表示）
     m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        st.markdown(f'<div class="metric-card"><h4 style="color:#111111 !important; margin:0 0 4px 0; font-weight:700;">登録選手数</h4><p style="color:#991b1b !important; margin:0; font-size:1.5rem; font-weight:800;">{len(summary_df)} 名</p></div>', unsafe_allow_html=True)
-    with m2:
-        total_hits = summary_df["安打"].sum()
-        st.markdown(f'<div class="metric-card"><h4 style="color:#111111 !important; margin:0 0 4px 0; font-weight:700;">チーム総安打数</h4><p style="color:#991b1b !important; margin:0; font-size:1.5rem; font-weight:800;">{total_hits} 本</p></div>', unsafe_allow_html=True)
-    with m3:
-        total_rbi = summary_df["打点"].sum()
-        st.markdown(f'<div class="metric-card"><h4 style="color:#111111 !important; margin:0 0 4px 0; font-weight:700;">チーム総打点</h4><p style="color:#991b1b !important; margin:0; font-size:1.5rem; font-weight:800;">{total_rbi} 点</p></div>', unsafe_allow_html=True)
-    with m4:
-        total_hr = summary_df["本塁打"].sum()
-        st.markdown(f'<div class="metric-card"><h4 style="color:#111111 !important; margin:0 0 4px 0; font-weight:700;">総本塁打数</h4><p style="color:#991b1b !important; margin:0; font-size:1.5rem; font-weight:800;">{total_hr} 本</p></div>', unsafe_allow_html=True)
+    m1.metric("登録選手数", f"{len(summary_df)} 名")
+    m2.metric("チーム総安打数", f"{summary_df['安打'].sum()} 本")
+    m3.metric("チーム総打点", f"{summary_df['打点'].sum()} 点")
+    m4.metric("総本塁打数", f"{summary_df['本塁打'].sum()} 本")
 
     st.markdown("#### 📋 選手別通算打撃成績一覧（1人1行 名寄せ集計済）")
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
