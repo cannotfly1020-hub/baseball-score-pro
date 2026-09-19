@@ -364,33 +364,6 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
 </style>
 """, unsafe_allow_html=True)
 
-/* ① プルダウン右端の下矢印（∨）を完全に消去して文字スペースを全開にする */
-div[data-testid="stForm"] div[data-baseweb="select"] svg,
-div[data-testid="stForm"] div[data-baseweb="select"] [data-baseweb="icon"] {
-    display: none !important;
-}
-
-/* ② ボタン枠内の文字：余白ゼロ＆適正サイズで「振り逃げ」を全文表示 */
-div[data-testid="stForm"] div[data-baseweb="select"] > div {
-    padding-left: 2px !important;
-    padding-right: 2px !important;
-}
-div[data-testid="stForm"] div[data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
-div[data-testid="stForm"] div[data-baseweb="select"] span {
-    font-size: 0.65rem !important;
-    letter-spacing: -0.8px !important;
-    white-space: nowrap !important;
-}
-
-/* ③ 開いた選択肢リスト：横幅を広げて「振り逃げ」が絶対に見切れないようにする */
-div[data-baseweb="popover"] ul[role="listbox"] {
-    min-width: 85px !important;
-}
-div[data-baseweb="popover"] li[role="option"] {
-    padding: 6px 4px !important;
-    font-size: 0.8rem !important;
-}
-
 # セッション状態の初期化
 if "all_matches_data" not in st.session_state:
     st.session_state.all_matches_data = {}
