@@ -278,18 +278,19 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
     /* ---------------------------------------------------
        PCプルダウンの余白圧縮＆矢印サイズ最適化
        --------------------------------------------------- */
-    /* セレクトボックス内部全体の左右余白を限界までカット */
+    /* セレクトボックス内部全体の左右余白を完全にゼロへ */
     div[data-testid="stForm"] div[data-baseweb="select"] > div {
-        padding-left: 2px !important;
-        padding-right: 2px !important;
+        padding-left: 0px !important;
+        padding-right: 0px !important;
     }
 
- /* 文字コンテナ：はみ出しを防止し適正サイズで全文表示 */
+    /* 文字コンテナ：極小サイズ＆強凝縮で4文字（振り逃げ）を100%枠内表示 */
     div[data-testid="stForm"] div[data-baseweb="select"] div[aria-hidden="true"],
     div[data-testid="stForm"] div[data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
-    div[data-testid="stForm"] div[data-baseweb="select"] span {
-        font-size: 0.58rem !important;
-        letter-spacing: -0.8px !important;
+    div[data-testid="stForm"] div[data-baseweb="select"] span,
+    div[data-testid="stForm"] div[data-baseweb="select"] * {
+        font-size: 0.50rem !important;
+        letter-spacing: -1.2px !important;
         white-space: nowrap !important;
     }
 
