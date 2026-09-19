@@ -11,40 +11,209 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ----------------------------------------------------
+# チームカラー UIデザイン（打撃成績入力画面と完全統一）
+# ----------------------------------------------------
 st.markdown("""
 <style>
-    /* スタジアム風グラデーション背景 */
-    .stApp {
-        background: radial-gradient(circle at 50% 10%, rgba(26, 56, 38, 0.55) 0%, transparent 65%),
-                    linear-gradient(165deg, #102418 0%, #0a1710 40%, #050d09 100%);
-        color: #f1f5f3;
+/* 1. 画面全体の背景：天然芝の深緑 */
+.stApp {
+    background-color: #0f1f17 !important;
+    color: #f0f4f1 !important;
+}
+
+/* 2. スマホ上部メニューバーとの重なりを防ぐ上部スペース */
+.block-container {
+    padding-top: 3.8rem !important;
+    padding-bottom: 2rem !important;
+    padding-left: 0.8rem !important;
+    padding-right: 0.8rem !important;
+}
+
+/* 3. 見出し・タイトルの装飾 */
+h1, h2, h3, h4 {
+    color: #ffffff !important;
+}
+
+/* 4. ファイルアップローダー（金枠ダッシュ・ダークグリーン背景） */
+[data-testid="stFileUploader"] {
+    background-color: #172d22 !important;
+    border: 1.5px dashed #d4af37 !important;
+    border-radius: 10px !important;
+    padding: 12px !important;
+}
+[data-testid="stFileUploader"] label p,
+[data-testid="stFileUploader"] span {
+    color: #f0f4f1 !important;
+    font-weight: bold !important;
+}
+
+/* 5. アクションボタン・ダウンロードボタン（クリムゾンレッド ＋ 金枠 ＋ 白文字） */
+button[data-testid="stBaseButton-primary"],
+button[data-testid="stBaseButton-secondary"],
+.stDownloadButton button {
+    background-color: #991b1b !important;
+    color: #ffffff !important;
+    border: 2px solid #d4af37 !important;
+    border-radius: 8px !important;
+    font-weight: bold !important;
+    font-size: 0.95rem !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+}
+button[data-testid="stBaseButton-primary"] *,
+button[data-testid="stBaseButton-secondary"] *,
+.stDownloadButton button * {
+    color: #ffffff !important;
+}
+
+/* 6. サマリーメトリクスカード（スコア用紙白 ＋ 赤金ストライプ枠） */
+.metric-card {
+    background-color: #ffffff !important;
+    border: 1px solid #dcd6cd !important;
+    border-left: 6px solid #991b1b !important;
+    border-radius: 8px !important;
+    padding: 12px 14px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+.metric-card h4 {
+    color: #111111 !important;
+    margin: 0 0 4px 0 !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+}
+.metric-card p {
+    color: #991b1b !important;
+    margin: 0 !important;
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+}
+
+/* 7. データフレーム（表）の背景と境界線 */
+[data-testid="stDataFrame"] {
+    background-color: #112217 !important;
+    border: 1px solid #2d5a45 !important;
+    border-radius: 8px !important;
+    padding: 6px !important;
+}
+
+/* ===================================================
+   全端末共通：サイドバーの「app」を「🏠 ホーム」に置換
+   =================================================== */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a {
+    position: relative !important;
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a *,
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child span,
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child p {
+    color: transparent !important;
+    opacity: 0 !important;
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a::after {
+    content: "🏠 ホーム" !important;
+    position: absolute !important;
+    left: 0.75rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 0.95rem !important;
+    font-weight: bold !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    white-space: nowrap !important;
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[aria-selected="true"]::after {
+    color: #ffd700 !important;
+}
+
+/* ===================================================
+   PCモニター表示専用（横幅768px以上）の最適化
+   =================================================== */
+@media (min-width: 768px) {
+    .block-container {
+        padding-top: 2.0rem !important;
+        padding-bottom: 2.0rem !important;
+        padding-left: 2.5rem !important;
+        padding-right: 2.5rem !important;
+        max-width: 1400px !important;
     }
-    /* メトリクス表示カード */
-    .metric-card {
-        background: #112217;
-        border: 1px solid #1f422e;
-        border-left: 5px solid #d4af37;
-        border-radius: 8px;
-        padding: 14px;
-        margin-bottom: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    div[data-testid="stCaptionContainer"] p {
+        color: #e0ece5 !important;
+        font-size: 1.0rem !important;
+        font-weight: 500 !important;
     }
-    .metric-card h4 {
-        color: #d4af37;
-        margin: 0 0 6px 0;
-        font-size: 0.92rem;
+
+    .stApp > div p, .stApp > div span {
+        color: #f0f4f1 !important;
     }
-    .metric-card p {
-        color: #e2e8f0;
-        margin: 0;
-        font-size: 1.4rem;
-        font-weight: bold;
+
+    hr {
+        margin-top: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
+        border-color: #2d5a45 !important;
     }
+
+    /* ---------------------------------------------------
+       サイドバー全体の背景・枠・文字色
+       --------------------------------------------------- */
+    section[data-testid="stSidebar"] {
+        width: 180px !important;
+        min-width: 180px !important;
+        border-right: 3px solid #d4af37 !important;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5) !important;
+    }
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] > div {
+        background-color: #801212 !important;
+    }
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] p {
+        color: #ffffff !important;
+        font-weight: bold !important;
+    }
+    section[data-testid="stSidebar"] [aria-selected="true"] span,
+    section[data-testid="stSidebar"] [aria-selected="true"] p {
+        color: #ffd700 !important;
+        font-weight: bold !important;
+    }
+
+    /* 開閉ボタン本体（枠線を金色・背景透明化） */
+    header[data-testid="stHeader"] {
+        background-color: transparent !important;
+    }
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="stSidebarCollapseButton"] button,
+    button[data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarHeader"] button {
+        background-color: transparent !important;
+        background: transparent !important;
+        border: 1.5px solid #d4af37 !important;
+        border-radius: 6px !important;
+        padding: 4px 6px !important;
+        box-shadow: none !important;
+    }
+    [data-testid="stSidebarCollapsedControl"] *,
+    [data-testid="stSidebarCollapseButton"] *,
+    [data-testid="stSidebarHeader"] button * {
+        color: #ffd700 !important;
+        fill: #ffd700 !important;
+        stroke: #ffd700 !important;
+    }
+    [data-testid="stSidebarCollapsedControl"]:hover,
+    [data-testid="stSidebarCollapsedControl"] button:hover,
+    [data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="stSidebarHeader"] button:hover {
+        background-color: rgba(212, 175, 55, 0.2) !important;
+        box-shadow: 0 0 8px rgba(212, 175, 55, 0.5) !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
-st.title("📊 データ統合・チーム通算集計")
-st.markdown("保存された試合ごとのExcelファイル（.xlsx）を取り込み、選手ごとに名寄せして通算打撃成績を集計します。")
+st.subheader("📊 データ統合・チーム通算集計")
+st.caption("保存された試合ごとのExcelファイル（.xlsx）を取り込み、選手ごとに名寄せして通算打撃成績を集計します。")
 
 def is_valid_game_sheet(sheet_name: str) -> bool:
     """
@@ -58,7 +227,7 @@ def is_valid_game_sheet(sheet_name: str) -> bool:
     return True
 
 uploaded_files = st.file_uploader(
-    "試合記録Excelファイル（.xlsx）をアップロードしてください（複数ファイル選択可）",
+    "試合記録Excelファイル（.xlsx）を選択してください（複数ファイル選択可）",
     type=["xlsx"],
     accept_multiple_files=True
 )
@@ -105,7 +274,7 @@ if all_records:
         else:
             raw_df[col] = 0
 
-    st.success(f"計 {len(uploaded_files)} ファイルから {len(raw_df)} 件の打撃レコードを正常に統合しました（まとめシートの重複を自動除外済）。")
+    st.success(f"🎉 計 {len(uploaded_files)} ファイルから {len(raw_df)} 件の打撃レコードを統合しました（まとめシートの重複を自動除外済）。")
 
     # 各選手の最新の背番号を取得（最後の行の記録を採用）
     latest_numbers = raw_df.groupby("選手名")["背番号"].last().fillna("-").astype(str)
@@ -154,7 +323,7 @@ if all_records:
     display_cols = [c for c in display_cols if c in summary_df.columns]
     summary_df = summary_df[display_cols].sort_values(by=["安打", "打率"], ascending=False).reset_index(drop=True)
 
-    # サマリーメトリクスカード表示
+    # サマリーメトリクスカード表示（白地・赤太文字のカードデザイン）
     m1, m2, m3, m4 = st.columns(4)
     with m1:
         st.markdown(f'<div class="metric-card"><h4>登録選手数</h4><p>{len(summary_df)} 名</p></div>', unsafe_allow_html=True)
@@ -168,16 +337,16 @@ if all_records:
         total_hr = summary_df["本塁打"].sum()
         st.markdown(f'<div class="metric-card"><h4>総本塁打数</h4><p>{total_hr} 本</p></div>', unsafe_allow_html=True)
 
-    st.subheader("📋 選手別通算打撃成績一覧（1人1行 名寄せ集計済）")
+    st.markdown("#### 📋 選手別通算打撃成績一覧（1人1行 名寄せ集計済）")
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
-    # 通算Excelファイルのダウンロード
+    st.divider()
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
         summary_df.to_excel(writer, index=False, sheet_name="通算打撃成績")
     
     st.download_button(
-        label="📥 通算成績をExcel形式でダウンロード (.xlsx)",
+        label="📥 チーム通算打撃成績Excelをダウンロード (.xlsx)",
         data=buffer.getvalue(),
         file_name="チーム通算打撃成績_名寄せ集計済.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
