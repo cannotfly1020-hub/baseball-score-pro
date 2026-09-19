@@ -324,19 +324,18 @@ if all_records:
     summary_df = summary_df[display_cols].sort_values(by=["安打", "打率"], ascending=False).reset_index(drop=True)
 
     # サマリーメトリクスカード表示（白地・赤太文字のカードデザイン）
-    m1, m2, m3, m4 = st.columns(4)
+        m1, m2, m3, m4 = st.columns(4)
     with m1:
-        st.markdown(f'<div class="metric-card"><h4>登録選手数</h4><p>{len(summary_df)} 名</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><h4 style="color:#111111 !important; margin:0 0 4px 0; font-weight:700;">登録選手数</h4><p style="color:#991b1b !important; margin:0; font-size:1.5rem; font-weight:800;">{len(summary_df)} 名</p></div>', unsafe_allow_html=True)
     with m2:
         total_hits = summary_df["安打"].sum()
-        st.markdown(f'<div class="metric-card"><h4>チーム総安打数</h4><p>{total_hits} 本</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><h4 style="color:#111111 !important; margin:0 0 4px 0; font-weight:700;">チーム総安打数</h4><p style="color:#991b1b !important; margin:0; font-size:1.5rem; font-weight:800;">{total_hits} 本</p></div>', unsafe_allow_html=True)
     with m3:
         total_rbi = summary_df["打点"].sum()
-        st.markdown(f'<div class="metric-card"><h4>チーム総打点</h4><p>{total_rbi} 点</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><h4 style="color:#111111 !important; margin:0 0 4px 0; font-weight:700;">チーム総打点</h4><p style="color:#991b1b !important; margin:0; font-size:1.5rem; font-weight:800;">{total_rbi} 点</p></div>', unsafe_allow_html=True)
     with m4:
         total_hr = summary_df["本塁打"].sum()
-        st.markdown(f'<div class="metric-card"><h4>総本塁打数</h4><p>{total_hr} 本</p></div>', unsafe_allow_html=True)
-
+        st.markdown(f'<div class="metric-card"><h4 style="color:#111111 !important; margin:0 0 4px 0; font-weight:700;">総本塁打数</h4><p style="color:#991b1b !important; margin:0; font-size:1.5rem; font-weight:800;">{total_hr} 本</p></div>', unsafe_allow_html=True)
     st.markdown("#### 📋 選手別通算打撃成績一覧（1人1行 名寄せ集計済）")
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
