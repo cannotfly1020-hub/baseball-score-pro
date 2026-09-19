@@ -294,16 +294,23 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         white-space: nowrap !important;
     }
 
-   /* 右端の下矢印エリア（ラッパーコンテナごと）を完全に消去 */
-    div[data-testid="stForm"] div[data-baseweb="select"] [aria-hidden="true"] {
-        display: none !important;
-    }
-    div[data-testid="stForm"] div[data-baseweb="select"] svg,
-    div[data-testid="stForm"] div[data-baseweb="select"] span[data-baseweb="icon"] {
-        display: none !important;
-        width: 0 !important;
-        height: 0 !important;
-    }
+  /* 右端の下矢印エリア（ラッパーコンテナごと）を完全に消去 */
+div[data-testid="stForm"] div[data-baseweb="select"] svg,
+div[data-testid="stForm"] div[data-baseweb="select"] [data-baseweb="icon"],
+div[data-testid="stForm"] div[data-baseweb="select"] > div > div:last-child {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* 開いた選択肢リスト：横幅を広げて「振り逃げ」を100%全文表示 */
+div[data-baseweb="popover"] ul[role="listbox"] {
+    min-width: 95px !important;
+}
+div[data-baseweb="popover"] li[role="option"] {
+    padding: 6px 4px !important;
+    font-size: 0.8rem !important;
+}
     }
 
     /* ---------------------------------------------------
