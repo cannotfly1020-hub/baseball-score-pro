@@ -284,12 +284,12 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         padding-right: 2px !important;
     }
 
-    /* 文字コンテナ：はみ出しを防止し適正サイズで全文表示 */
+ /* 文字コンテナ：はみ出しを防止し適正サイズで全文表示 */
     div[data-testid="stForm"] div[data-baseweb="select"] div[aria-hidden="true"],
     div[data-testid="stForm"] div[data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
     div[data-testid="stForm"] div[data-baseweb="select"] span {
-        font-size: 0.68rem !important;
-        letter-spacing: -0.5px !important;
+        font-size: 0.58rem !important;
+        letter-spacing: -0.8px !important;
         white-space: nowrap !important;
     }
 
