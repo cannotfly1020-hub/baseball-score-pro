@@ -368,6 +368,17 @@ div[data-baseweb="popover"] li[role="option"] {
         box-shadow: 0 0 8px rgba(212, 175, 55, 0.5) !important;
     }
 }
+/* 画面の横幅を左端から右端まで100%全開にし、左の黒い余白を消滅させる */
+.stApp [data-testid="stMainBlockContainer"],
+.stApp .block-container,
+div[data-testid="stMainBlockContainer"] {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
