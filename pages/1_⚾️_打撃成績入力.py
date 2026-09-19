@@ -243,7 +243,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNav"] li:first-child a[a
         padding-bottom: 2.0rem !important;
         padding-left: 2.5rem !important;
         padding-right: 2.5rem !important;
-        max-width: 1400px !important;
+        max-width: 100% !important;
     }
 
     div[data-testid="stCaptionContainer"] p {
